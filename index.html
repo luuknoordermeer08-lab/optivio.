@@ -258,7 +258,8 @@
     <section id="contact">
       <div class="container contact-grid">
         <div class="contact-copy"><div class="kicker">Contact</div><h2>Vertel ons wat je wilt automatiseren.</h2><p>Laat je gegevens en je vraag achter. Optivio kan daarna contact opnemen om de mogelijkheden te bespreken.</p><div class="contact-info"><span>✉ E-mail:<strong>opti-vio@outlook.com</strong></span><span>⌖ Werkgebied: Nederland</span><span>◷ Reactie: op afspraak</span></div></div>
-        <form class="contact-form" id="contactForm">
+       <input type="hidden" name="_subject" value="Nieuwe aanvraag via Optivio">
+<input type="hidden" name="_captcha" value="false">
           <div class="form-grid">
             <div class="field"><label for="name">Naam *</label><input id="name" name="name" autocomplete="name" required placeholder="Je naam"></div>
             <div class="field"><label for="company">Bedrijf</label><input id="company" name="company" autocomplete="organization" placeholder="Bedrijfsnaam"></div>
@@ -268,7 +269,7 @@
             <div class="field"><label for="service">Waar ben je naar op zoek?</label><select id="service" name="service"><option>AI-klantenservice</option><option>Leads en aanvragen</option><option>Afspraken automatiseren</option><option>Administratie</option><option>Anders / ik weet het nog niet</option></select></div>
           </div>
           <div class="field"><label for="message">Waar wil je tijd mee besparen? *</label><textarea id="message" name="message" required placeholder="Beschrijf kort hoe het nu werkt en wat je graag wilt automatiseren..."></textarea></div>
-          <button class="btn btn-primary" type="submit">Verstuur aanvraag <span>→</span></button>
+          document.getElementById('contactForm').addEventListener('submit', event => {
           <p class="form-note">Dit formulier opent je e-mailprogramma met de ingevulde aanvraag. Er worden via deze demo geen gegevens op een server opgeslagen.</p>
           <div class="form-status" id="formStatus" role="status">Je e-mailprogramma wordt geopend. Controleer de aanvraag en verstuur de e-mail.</div>
         </form>
