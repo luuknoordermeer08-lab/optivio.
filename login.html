@@ -1,1 +1,168 @@
 
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Optivio | Inloggen</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f6fb;
+  font-family: Arial, sans-serif;
+  color: #17243b;
+  padding: 20px;
+}
+
+.login {
+  background: white;
+  width: 100%;
+  max-width: 420px;
+  padding: 40px;
+  border-radius: 18px;
+  box-shadow: 0 10px 40px #17243b12;
+}
+
+.logo {
+  font-size: 30px;
+  font-weight: bold;
+  color: #1769e0;
+  margin-bottom: 10px;
+}
+
+h1 { font-size: 25px; margin-bottom: 8px; }
+
+.subtitle {
+  color: #718096;
+  font-size: 14px;
+  margin-bottom: 30px;
+}
+
+label {
+  display: block;
+  font-size: 14px;
+  font-weight: bold;
+  margin: 18px 0 8px;
+}
+
+input {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid #dce3ed;
+  border-radius: 9px;
+  font-size: 15px;
+  outline: none;
+}
+
+input:focus { border-color: #1769e0; }
+
+button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 25px;
+  background: #1769e0;
+  color: white;
+  border: none;
+  border-radius: 9px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:disabled { opacity: .6; cursor: wait; }
+
+#message {
+  margin-top: 18px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.footer {
+  text-align: center;
+  margin-top: 30px;
+  color: #9aa5b5;
+  font-size: 12px;
+}
+</style>
+</head>
+<body>
+
+<div class="login">
+  <div class="logo">OPTIVIO.</div>
+  <h1>Welkom terug</h1>
+  <p class="subtitle">Log in op jouw beveiligde bedrijfsomgeving.</p>
+
+  <form id="loginForm">
+    <label for="email">E-mailadres</label>
+    <input id="email" type="email" placeholder="naam@bedrijf.nl" required>
+
+    <label for="password">Wachtwoord</label>
+    <input id="password" type="password" placeholder="Jouw wachtwoord" required>
+
+    <button id="submitButton" type="submit">Inloggen</button>
+  </form>
+
+  <div id="message" role="status"></div>
+
+  <div class="footer">© 2026 Optivio · Beveiligde omgeving</div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://vcgcowklqvfektlyzmia.supabase.co";
+const SUPABASE_KEY = "sb_publishable_6LEmGg5LMjgNoHHJDYmzfg_vZKf13Ry";
+
+const db = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+
+const form = document.getElementById("loginForm");
+const message = document.getElementById("message");
+const button = document.getElementById("submitButton");
+
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  button.disabled = true;
+  button.textContent = "Bezig met inloggen...";
+  message.textContent = "";
+
+  try {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+
+    const { data, error } = await db.auth.signInWithPassword({
+      email,
+      password
+    });
+
+    if (error) throw error;
+
+    if (!data.session) {
+      throw new Error("Geen actieve sessie gevonden.");
+    }
+
+    message.style.color = "#16834a";
+    message.textContent = "Inloggen gelukt. Dashboard openen...";
+
+    window.location.replace("dashboard.html");
+
+  } catch (error) {
+    message.style.color = "#d33";
+    message.textContent = error.message;
+    button.disabled = false;
+    button.textContent = "Inloggen";
+  }
+});
+</script>
+
+</body>
+</html>
+
