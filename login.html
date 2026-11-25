@@ -4,10 +4,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Optivio | Inloggen</title>
+<title>Optivio | Klantlogin</title>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
@@ -15,57 +19,69 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 24px;
   background: #f3f6fb;
   font-family: Arial, sans-serif;
   color: #17243b;
-  padding: 20px;
 }
 
 .login {
-  background: white;
   width: 100%;
-  max-width: 420px;
-  padding: 40px;
-  border-radius: 18px;
-  box-shadow: 0 10px 40px #17243b12;
+  max-width: 430px;
+  padding: 42px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 15px 50px #17243b12;
 }
 
 .logo {
-  font-size: 30px;
-  font-weight: bold;
   color: #1769e0;
-  margin-bottom: 10px;
+  font-size: 29px;
+  font-weight: 800;
+  letter-spacing: -1px;
 }
 
-h1 { font-size: 25px; margin-bottom: 8px; }
+.tagline {
+  color: #8793a5;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+h1 {
+  font-size: 26px;
+  margin: 35px 0 8px;
+}
 
 .subtitle {
   color: #718096;
   font-size: 14px;
-  margin-bottom: 30px;
+  line-height: 1.6;
 }
 
 label {
   display: block;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: bold;
-  margin: 18px 0 8px;
+  margin: 22px 0 8px;
 }
 
 input {
   width: 100%;
-  padding: 14px;
+  padding: 15px;
   border: 1px solid #dce3ed;
   border-radius: 9px;
   font-size: 15px;
   outline: none;
 }
 
-input:focus { border-color: #1769e0; }
+input:focus {
+  border-color: #1769e0;
+  box-shadow: 0 0 0 3px #1769e015;
+}
 
 button {
   width: 100%;
-  padding: 14px;
+  padding: 15px;
   margin-top: 25px;
   background: #1769e0;
   color: white;
@@ -76,93 +92,188 @@ button {
   cursor: pointer;
 }
 
-button:disabled { opacity: .6; cursor: wait; }
+button:disabled {
+  opacity: .6;
+  cursor: wait;
+}
+
+.forgot {
+  display: block;
+  text-align: right;
+  margin-top: 15px;
+  color: #1769e0;
+  font-size: 13px;
+  text-decoration: none;
+}
 
 #message {
+  display: none;
   margin-top: 18px;
-  font-size: 14px;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 13px;
   line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .footer {
   text-align: center;
-  margin-top: 30px;
+  margin-top: 35px;
   color: #9aa5b5;
   font-size: 12px;
 }
+
+@media(max-width:480px) {
+  .login {
+    padding: 28px 23px;
+  }
+}
 </style>
 </head>
+
 <body>
 
 <div class="login">
+
   <div class="logo">OPTIVIO.</div>
+  <div class="tagline">YOUR BUSINESS. ORGANIZED.</div>
+
   <h1>Welkom terug</h1>
-  <p class="subtitle">Log in op jouw beveiligde bedrijfsomgeving.</p>
+  <p class="subtitle">
+    Log in op jouw persoonlijke en beveiligde bedrijfsomgeving.
+  </p>
 
   <form id="loginForm">
+
     <label for="email">E-mailadres</label>
-    <input id="email" type="email" placeholder="naam@bedrijf.nl" required>
+    <input
+      id="email"
+      type="email"
+      placeholder="naam@bedrijf.nl"
+      autocomplete="username"
+      required
+    >
 
     <label for="password">Wachtwoord</label>
-    <input id="password" type="password" placeholder="Jouw wachtwoord" required>
+    <input
+      id="password"
+      type="password"
+      placeholder="Jouw wachtwoord"
+      autocomplete="current-password"
+      required
+    >
 
-    <button id="submitButton" type="submit">Inloggen</button>
+    <button id="submitButton" type="submit">
+      Inloggen
+    </button>
+
   </form>
 
-  <div id="message" role="status"></div>
+  <a href="#" class="forgot" id="forgotPassword">
+    Wachtwoord vergeten?
+  </a>
 
-  <div class="footer">© 2026 Optivio · Beveiligde omgeving</div>
+  <div id="message" role="status" aria-live="polite"></div>
+
+  <div class="footer">
+    © 2026 Optivio · Beveiligde klantomgeving
+  </div>
+
 </div>
 
 <script>
-const SUPABASE_URL = "https://vcgcowklqvfektlyzmia.supabase.co";
-const SUPABASE_KEY = "sb_publishable_6LEmGg5LMjgNoHHJDYmzfg_vzKf13Ry";
+const SUPABASE_URL =
+  "https://vcgcowklqvfektlyzmia.supabase.co";
 
-const db = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
+const SUPABASE_KEY =
+  "sb_publishable_6LEmGg5LMjgNoHHJDYmzfg_vzKf13Ry";
 
-const form = document.getElementById("loginForm");
 const message = document.getElementById("message");
 const button = document.getElementById("submitButton");
+const form = document.getElementById("loginForm");
 
-form.addEventListener("submit", async (event) => {
-  event.preventDefault();
+function showMessage(text, success = false) {
+  message.style.display = "block";
+  message.style.background = success ? "#e8f7ee" : "#fff0f0";
+  message.style.color = success ? "#16834a" : "#c62828";
+  message.textContent = text;
+}
 
-  button.disabled = true;
-  button.textContent = "Bezig met inloggen...";
-  message.textContent = "";
+if (!window.supabase) {
+  showMessage("De beveiligde verbinding kon niet worden geladen. Vernieuw de pagina.");
+} else {
 
-  try {
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value;
+  const db = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
 
-    const { data, error } = await db.auth.signInWithPassword({
-      email,
-      password
-    });
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
 
-    if (error) throw error;
+    button.disabled = true;
+    button.textContent = "Bezig met inloggen...";
+    message.style.display = "none";
 
-    if (!data.session) {
-      throw new Error("Geen actieve sessie gevonden.");
+    try {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      const { data, error } = await db.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) throw error;
+
+      if (!data.session) {
+        throw new Error("Geen actieve inlogsessie gevonden.");
+      }
+
+      showMessage("Inloggen gelukt. Dashboard openen...", true);
+
+      window.location.replace("/dashboard.html");
+
+    } catch (error) {
+      showMessage(error.message);
+      button.disabled = false;
+      button.textContent = "Inloggen";
     }
+  });
 
-    message.style.color = "#16834a";
-    message.textContent = "Inloggen gelukt. Dashboard openen...";
+  document.getElementById("forgotPassword").addEventListener(
+    "click",
+    async (event) => {
+      event.preventDefault();
 
-    window.location.replace("dashboard.html");
+      const email = document.getElementById("email").value.trim();
 
-  } catch (error) {
-    message.style.color = "#d33";
-    message.textContent = error.message;
-    button.disabled = false;
-    button.textContent = "Inloggen";
-  }
-});
+      if (!email) {
+        showMessage("Vul eerst je e-mailadres in.");
+        document.getElementById("email").focus();
+        return;
+      }
+
+      try {
+        const { error } = await db.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin + "/reset-password.html"
+        });
+
+        if (error) throw error;
+
+        showMessage(
+          "Als dit e-mailadres bij een account hoort, ontvang je een herstelmail.",
+          true
+        );
+
+      } catch (error) {
+        showMessage(error.message);
+      }
+    }
+  );
+
+}
 </script>
 
 </body>
 </html>
-
