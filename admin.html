@@ -1,1 +1,291 @@
 
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Optivio | Super Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#080d1a;color:#f4f6ff;font-family:Arial,sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+.login{min-height:100vh;display:grid;place-items:center;padding:20px}
+.loginbox,.card,.stat{background:#111c2e;border:1px solid #263550;border-radius:16px}
+.loginbox{width:min(420px,100%);padding:30px}
+input,select{background:#0b1424;color:white;border:1px solid #30405b;border-radius:9px;padding:12px;width:100%;margin:7px 0 15px}
+button{background:#718cff;color:white;border:0;border-radius:9px;padding:11px 15px;font-weight:bold}
+.loginbox button{width:100%}
+.error{color:#ff8295;font-size:13px}
+.app{display:flex;min-height:100vh}
+aside{width:230px;background:#0c1424;border-right:1px solid #263550;padding:24px 15px;flex-shrink:0}
+.logo{font-size:23px;font-weight:900;margin:0 10px 35px}
+.logo span{color:#718cff}
+nav button{display:block;width:100%;text-align:left;background:transparent;color:#aab6cc;margin:5px 0}
+nav button.active,nav button:hover{background:#1b2b49;color:white}
+main{padding:30px;flex:1;min-width:0}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;gap:12px}
+h1{font-size:27px;margin:0 0 8px}
+h2{font-size:17px;margin:0 0 8px}
+p,.muted{color:#91a0b8;font-size:13px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+.stat{padding:18px}
+.stat small{color:#91a0b8}
+.number{font-size:27px;font-weight:bold;margin-top:15px}
+.grid{display:grid;grid-template-columns:1.2fr 1fr;gap:15px;margin-bottom:16px}
+.card{padding:20px;min-width:0}
+.chart{height:260px;position:relative}
+.donut{height:230px;max-width:360px;margin:auto}
+.page{display:none}
+.page.active{display:block}
+table{width:100%;border-collapse:collapse;min-width:600px}
+th,td{text-align:left;padding:14px;border-bottom:1px solid #263550;font-size:13px}
+th{color:#91a0b8;font-size:11px}
+.tablewrap{overflow:auto}
+.pill{padding:5px 9px;border-radius:20px;background:#253651;font-size:11px}
+.activepill{background:#164c3d;color:#7ae2b8}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap}
+.toolbar input{width:220px;margin:0}
+.toolbar select{width:auto;margin:0}
+.empty{text-align:center;padding:25px;color:#91a0b8}
+@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
+@media(max-width:650px){.app{display:block}aside{width:100%;padding:15px}nav{display:grid;grid-template-columns:repeat(2,1fr)}main{padding:16px}header{align-items:flex-start}.number{font-size:22px}}
+</style>
+</head>
+<body>
+
+<section id="login" class="login">
+<div class="loginbox">
+<div class="logo">OPTIVIO<span>.</span></div>
+<h1>Super Admin</h1>
+<p>Log in op jouw beveiligde beheeromgeving.</p>
+<form id="loginForm">
+<label>E-mailadres</label>
+<input id="email" type="email" required>
+<label>Wachtwoord</label>
+<input id="password" type="password" required>
+<button id="loginButton">Inloggen</button>
+</form>
+<p id="loginError" class="error"></p>
+</div>
+</section>
+
+<div id="app" class="app hidden">
+<aside>
+<div class="logo">OPTIVIO<span>.</span></div>
+<nav>
+<button class="active" data-page="overview">◫ Overzicht</button>
+<button data-page="customers">▦ Klanten</button>
+<button data-page="subscriptions">◈ Abonnementen</button>
+<button data-page="payments">€ Betalingen</button>
+<button data-page="visitors">◎ Bezoekers</button>
+<button data-page="activity">↗ Activiteiten</button>
+<button data-page="system">⚙ Systeemstatus</button>
+</nav>
+<p id="userEmail" style="margin:30px 10px"></p>
+<button id="logout" style="background:#472331">Uitloggen</button>
+</aside>
+
+<main>
+<header>
+<div><small class="muted">OPTIVIO CONTROL CENTER</small><h1 id="title">Overzicht</h1></div>
+<button id="refresh">↻ Vernieuwen</button>
+</header>
+
+<section id="overview" class="page active">
+<h1>Platformoverzicht</h1>
+<p>De actuele gegevens van jouw Optivio-platform.</p>
+<div class="stats">
+<div class="stat"><small>Totale klanten</small><div class="number" id="totalCustomers">0</div></div>
+<div class="stat"><small>Actieve abonnementen</small><div class="number" id="totalSubs">0</div></div>
+<div class="stat"><small>Maandelijkse omzet</small><div class="number" id="revenue">€0</div></div>
+<div class="stat"><small>Betaalde transacties</small><div class="number" id="paidCount">0</div></div>
+</div>
+<div class="grid">
+<div class="card"><h2>Omzetontwikkeling</h2><p>Betaalde transacties per maand</p><div class="chart"><canvas id="revenueChart"></canvas></div></div>
+<div class="card"><h2>Abonnementen per pakket</h2><p>Verdeling van alle pakketten</p><div class="donut"><canvas id="planChart"></canvas></div></div>
+</div>
+<div class="grid">
+<div class="card"><h2>Klantstatus</h2><p>Verdeling van klanten</p><div class="donut"><canvas id="customerChart"></canvas></div></div>
+<div class="card"><h2>Recente klanten</h2><div id="recentCustomers" class="empty">Nog geen klanten.</div></div>
+</div>
+</section>
+
+<section id="customers" class="page">
+<header><div><h1>Klantenbeheer</h1><p>Beheer jouw aangesloten bedrijven.</p></div><button id="addCustomer">+ Klant toevoegen</button></header>
+<div class="card">
+<div class="toolbar"><input id="searchCustomer" placeholder="Zoek bedrijf of e-mail"><select id="filterCustomer"><option value="">Alle statussen</option><option value="active">Actief</option><option value="pending">In afwachting</option><option value="suspended">Geschorst</option><option value="cancelled">Geannuleerd</option></select></div>
+<div class="tablewrap"><table><thead><tr><th>Bedrijf</th><th>E-mail</th><th>Status</th><th>Aangemaakt</th><th>Actie</th></tr></thead><tbody id="customersTable"></tbody></table></div>
+</div>
+</section>
+
+<section id="subscriptions" class="page">
+<header><div><h1>Abonnementen</h1><p>Beheer pakketten en maandprijzen.</p></div><button id="addSubscription">+ Abonnement toevoegen</button></header>
+<div class="card tablewrap"><table><thead><tr><th>Bedrijf</th><th>Pakket</th><th>Prijs per maand</th><th>Status</th><th>Startdatum</th></tr></thead><tbody id="subscriptionsTable"></tbody></table></div>
+</section>
+
+<section id="payments" class="page">
+<h1>Betalingen</h1><p>Geregistreerde transacties.</p>
+<div class="stats">
+<div class="stat"><small>Totaal betaald</small><div class="number" id="paidTotal">€0</div></div>
+<div class="stat"><small>Aantal betalingen</small><div class="number" id="paymentTotal">0</div></div>
+</div>
+<div class="card tablewrap"><table><thead><tr><th>Bedrijf</th><th>Bedrag</th><th>Status</th><th>Referentie</th><th>Datum</th></tr></thead><tbody id="paymentsTable"></tbody></table></div>
+</section>
+
+<section id="visitors" class="page">
+<h1>Websitebezoekers</h1><p>Bezoeken die in de database zijn opgeslagen.</p>
+<div class="stats">
+<div class="stat"><small>Totaal bezoeken</small><div class="number" id="visitorTotal">0</div></div>
+<div class="stat"><small>Vandaag</small><div class="number" id="visitorToday">0</div></div>
+<div class="stat"><small>Unieke tokens</small><div class="number" id="visitorUnique">0</div></div>
+</div>
+<div class="card"><h2>Bezoeken per dag</h2><div class="chart"><canvas id="visitorChart"></canvas></div><p>Tracking moet nog apart worden aangesloten.</p></div>
+</section>
+
+<section id="activity" class="page">
+<h1>Activiteitenlogboek</h1><p>Gebeurtenissen van het platform.</p>
+<div class="card tablewrap"><table><thead><tr><th>Gebeurtenis</th><th>Omschrijving</th><th>Klant-ID</th><th>Datum</th></tr></thead><tbody id="activityTable"></tbody></table></div>
+</section>
+
+<section id="system" class="page">
+<h1>Systeemstatus</h1><p>Technische status van jouw platform.</p>
+<div class="card">
+<p>● Supabase-authenticatie: <b id="authStatus">Controleren</b></p>
+<p>● Platformdatabase: <b id="dbStatus">Controleren</b></p>
+<p>● Website-tracking: <b>Nog niet aangesloten</b></p>
+<p>● Betaalprovider: <b>Nog niet aangesloten</b></p>
+<p class="muted">Gebruik nooit een service_role- of secret-key in deze website.</p>
+</div>
+</section>
+</main>
+</div>
+
+<script>
+const SUPABASE_URL="https://aimyxolnmpvxeubxsazm.supabase.co";
+const SUPABASE_KEY="sb_publishable_Ln4wdEu4koLQ4_HqNn5jJg_ryXxprl6";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const $=id=>document.getElementById(id);
+let customers=[],subs=[],payments=[],visitors=[],activities=[],charts={};
+
+const money=n=>new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(n||0));
+const date=v=>v?new Date(v).toLocaleDateString('nl-NL'):'—';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const status=s=>`<span class="pill ${s==='active'||s==='paid'?'activepill':''}">${esc(s)}</span>`;
+
+async function fetchRows(table){
+ const {data,error}=await db.from(table).select('*').order('created_at',{ascending:false}).limit(1000);
+ if(error)throw error;
+ return data||[];
+}
+async function checkAdmin(user){
+ const {data,error}=await db.from('platform_admins').select('active').eq('user_id',user.id).maybeSingle();
+ if(error)throw error;
+ if(!data||data.active!==true)throw new Error('Dit account heeft geen Super Admin-rechten.');
+}
+function showApp(user){
+ $('login').classList.add('hidden');$('app').classList.remove('hidden');
+ $('userEmail').textContent=user.email||'Beheerder';
+}
+async function login(e){
+ e.preventDefault();$('loginButton').disabled=true;$('loginError').textContent='';
+ const {data,error}=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});
+ $('loginButton').disabled=false;
+ if(error){$('loginError').textContent='Inloggen mislukt. Controleer je gegevens.';return}
+ try{await checkAdmin(data.user);showApp(data.user);await load()}
+ catch(err){await db.auth.signOut();$('loginError').textContent=err.message}
+}
+$('loginForm').addEventListener('submit',login);
+$('logout').onclick=()=>db.auth.signOut();
+db.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT'){$('app').classList.add('hidden');$('login').classList.remove('hidden')}});
+db.auth.getSession().then(async({data})=>{if(data.session){try{await checkAdmin(data.session.user);showApp(data.session.user);await load()}catch(e){await db.auth.signOut();$('loginError').textContent=e.message}}});
+
+async function load(){
+ $('dbStatus').textContent='Verbinden…';
+ try{
+  [customers,subs,payments,visitors,activities]=await Promise.all([
+   fetchRows('platform_customers'),fetchRows('platform_subscriptions'),
+   fetchRows('platform_payments'),fetchRows('platform_visitors'),fetchRows('platform_activity')
+  ]);
+  $('dbStatus').textContent='Verbonden';$('authStatus').textContent='Ingelogd';
+  render();
+ }catch(e){$('dbStatus').textContent='Fout';alert('Databasefout: '+e.message)}
+}
+function chart(id,type,labels,values,colors){
+ if(charts[id])charts[id].destroy();
+ charts[id]=new Chart($(id),{type,data:{labels,datasets:[{data:values,backgroundColor:colors||'#718cff',borderColor:'#111c2e',borderWidth:3,tension:.35,fill:type==='line'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:type==='doughnut',labels:{color:'#cbd5e1'}}},scales:type==='doughnut'?{}:{x:{ticks:{color:'#91a0b8'},grid:{display:false}},y:{ticks:{color:'#91a0b8'},grid:{color:'#263550'}}}}});
+}
+function render(){
+ $('totalCustomers').textContent=customers.length;
+ $('totalSubs').textContent=subs.filter(s=>s.status==='active').length;
+ $('revenue').textContent=money(subs.filter(s=>s.status==='active').reduce((a,s)=>a+Number(s.price_monthly||0),0));
+ $('paidCount').textContent=payments.filter(p=>p.status==='paid').length;
+ $('paidTotal').textContent=money(payments.filter(p=>p.status==='paid').reduce((a,p)=>a+Number(p.amount||0),0));
+ $('paymentTotal').textContent=payments.filter(p=>p.status==='paid').length;
+ $('visitorTotal').textContent=visitors.length;
+ $('visitorToday').textContent=visitors.filter(v=>new Date(v.visited_at).toDateString()===new Date().toDateString()).length;
+ $('visitorUnique').textContent=new Set(visitors.map(v=>v.visitor_token)).size;
+
+ const plans=['starter','professional','enterprise'];
+ chart('planChart','doughnut',['Starter','Professional','Enterprise'],plans.map(p=>subs.filter(s=>s.plan===p).length),['#718cff','#4bd6d0','#a78bfa']);
+ const states=['active','pending','suspended','cancelled'];
+ chart('customerChart','doughnut,['Actief','In afwachting','Geschorst','Geannuleerd'],states.map(s=>customers.filter(c=>c.status===s).length),['#46d39a','#f6c96b','#ff9b71','#ff7185']);
+ const months=[],amounts=[];for(let i=11;i>=0;i--){const d=new Date();d.setDate(1);d.setMonth(d.getMonth()-i);months.push(d.toLocaleDateString('nl-NL',{month:'short'}));amounts.push(payments.filter(p=>p.status==='paid'&&new Date(p.created_at).getMonth()===d.getMonth()&&new Date(p.created_at).getFullYear()===d.getFullYear()).reduce((a,p)=>a+Number(p.amount||0),0))}
+ chart('revenueChart','line',months,amounts,'#718cff');
+ const days=[],visits=[];for(let i=13;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(d.toLocaleDateString('nl-NL',{day:'2-digit',month:'short'}));visits.push(visitors.filter(v=>new Date(v.visited_at).toDateString()===d.toDateString()).length)}
+ chart('visitorChart','bar',days,visits,'#4bd6d0');
+
+ $('recentCustomers').innerHTML=customers.slice(0,5).map(c=>`<p>${esc(c.company_name)} · ${status(c.status)}</p>`).join('')||'Nog geen klanten.';
+ renderCustomers();renderSubs();renderPayments();renderActivities();
+}
+function renderCustomers(){
+ const q=$('searchCustomer').value.toLowerCase(),f=$('filterCustomer').value;
+ const rows=customers.filter(c=>(!f||c.status===f)&&(`${c.company_name} ${c.owner_email}`).toLowerCase().includes(q));
+ $('customersTable').innerHTML=rows.map(c=>`<tr><td>${esc(c.company_name)}</td><td>${esc(c.owner_email)}</td><td>${status(c.status)}</td><td>${date(c.created_at)}</td><td><button data-customer="${c.id}">Status wijzigen</button></td></tr>`).join('')||'<tr><td colspan="5" class="empty">Geen klanten gevonden.</td></tr>';
+}
+function renderSubs(){
+ $('subscriptionsTable').innerHTML=subs.map(s=>{const c=customers.find(c=>c.id===s.customer_id);return `<tr><td>${esc(c?.company_name||'Onbekend')}</td><td>${esc(s.plan)}</td><td>${money(s.price_monthly)}</td><td>${status(s.status)}</td><td>${date(s.start_date)}</td></tr>`}).join('')||'<tr><td colspan="5" class="empty">Geen abonnementen.</td></tr>';
+}
+function renderPayments(){
+ $('paymentsTable').innerHTML=payments.map(p=>{const c=customers.find(c=>c.id===p.customer_id);return `<tr><td>${esc(c?.company_name||'Onbekend')}</td><td>${money(p.amount)}</td><td>${status(p.status)}</td><td>${esc(p.provider_reference||'—')}</td><td>${date(p.created_at)}</td></tr>`}).join('')||'<tr><td colspan="5" class="empty">Geen betalingen.</td></tr>';
+}
+function renderActivities(){
+ $('activityTable').innerHTML=activities.map(a=>`<tr><td>${esc(a.event_type)}</td><td>${esc(a.description)}</td><td>${esc(a.customer_id||'—')}</td><td>${date(a.created_at)}</td></tr>`).join('')||'<tr><td colspan="4" class="empty">Geen activiteiten.</td></tr>';
+}
+$('refresh').onclick=load;
+document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>{
+ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+ $(b.dataset.page).classList.add('active');
+ document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
+ b.classList.add('active');$('title').textContent=b.textContent.trim();
+});
+$('searchCustomer').oninput=renderCustomers;$('filterCustomer').onchange=renderCustomers;
+
+$('addCustomer').onclick=async()=>{
+ const company_name=prompt('Bedrijfsnaam?');if(!company_name)return;
+ const owner_email=prompt('E-mailadres eigenaar?');if(!owner_email)return;
+ const {error}=await db.from('platform_customers').insert({company_name,owner_email,status:'pending'});
+ if(error)alert(error.message);else await load();
+};
+$('addSubscription').onclick=async()=>{
+ if(!customers.length){alert('Voeg eerst een klant toe.');return}
+ const list=customers.map((c,i)=>`${i+1}. ${c.company_name}`).join('\n');
+ const choice=Number(prompt('Kies klantnummer:\n'+list));if(!choice||!customers[choice-1])return;
+ const plan=prompt('Pakket: starter, professional of enterprise','starter');if(!['starter','professional','enterprise'].includes(plan))return;
+ const price=Number(prompt('Prijs per maand in euro','29'));if(!Number.isFinite(price)||price<0)return;
+ const {error}=await db.from('platform_subscriptions').insert({customer_id:customers[choice-1].id,plan,price_monthly:price,status:'pending',start_date:new Date().toISOString()});
+ if(error)alert(error.message);else await load();
+};
+$('customersTable').onclick=async e=>{
+ const id=e.target.dataset.customer;if(!id)return;
+ const c=customers.find(x=>x.id===id);const states=['pending','active','suspended','cancelled'];const next=states[(states.indexOf(c.status)+1)%states.length];
+ const {error}=await db.from('platform_customers').update({status:next}).eq('id',id);
+ if(error)alert(error.message);else await load();
+};
+</script>
+</body>
+</html>
+
