@@ -4,20 +4,20 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Optivio | Super Admin</title>
+<title>Optivio | Control Center</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#080d1a;color:#f4f6ff;font-family:Arial,sans-serif}
 button,input,select{font:inherit}
-button{cursor:pointer}
+button{cursor:pointer;border:0;border-radius:9px;padding:11px 15px;background:#718cff;color:white;font-weight:bold}
+button:disabled{opacity:.5;cursor:wait}
+input,select{background:#0b1424;color:white;border:1px solid #30405b;border-radius:9px;padding:12px;width:100%;margin:7px 0 15px}
 .hidden{display:none!important}
 .login{min-height:100vh;display:grid;place-items:center;padding:20px}
 .loginbox,.card,.stat{background:#111c2e;border:1px solid #263550;border-radius:16px}
 .loginbox{width:min(420px,100%);padding:30px}
-input,select{background:#0b1424;color:white;border:1px solid #30405b;border-radius:9px;padding:12px;width:100%;margin:7px 0 15px}
-button{background:#718cff;color:white;border:0;border-radius:9px;padding:11px 15px;font-weight:bold}
 .loginbox button{width:100%}
 .error{color:#ff8295;font-size:13px}
 .app{display:flex;min-height:100vh}
@@ -27,7 +27,7 @@ aside{width:230px;background:#0c1424;border-right:1px solid #263550;padding:24px
 nav button{display:block;width:100%;text-align:left;background:transparent;color:#aab6cc;margin:5px 0}
 nav button.active,nav button:hover{background:#1b2b49;color:white}
 main{padding:30px;flex:1;min-width:0}
-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;gap:12px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px;gap:12px}
 h1{font-size:27px;margin:0 0 8px}
 h2{font-size:17px;margin:0 0 8px}
 p,.muted{color:#91a0b8;font-size:13px}
@@ -47,10 +47,12 @@ th{color:#91a0b8;font-size:11px}
 .tablewrap{overflow:auto}
 .pill{padding:5px 9px;border-radius:20px;background:#253651;font-size:11px}
 .activepill{background:#164c3d;color:#7ae2b8}
-.toolbar{display:flex;gap:8px;flex-wrap:wrap}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px}
 .toolbar input{width:220px;margin:0}
 .toolbar select{width:auto;margin:0}
 .empty{text-align:center;padding:25px;color:#91a0b8}
+.page-header{margin-bottom:18px}
+#notice{margin-bottom:15px;color:#f6c96b}
 @media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
 @media(max-width:650px){.app{display:block}aside{width:100%;padding:15px}nav{display:grid;grid-template-columns:repeat(2,1fr)}main{padding:16px}header{align-items:flex-start}.number{font-size:22px}}
 </style>
@@ -63,11 +65,11 @@ th{color:#91a0b8;font-size:11px}
 <h1>Super Admin</h1>
 <p>Log in op jouw beveiligde beheeromgeving.</p>
 <form id="loginForm">
-<label>E-mailadres</label>
-<input id="email" type="email" required>
-<label>Wachtwoord</label>
-<input id="password" type="password" required>
-<button id="loginButton">Inloggen</button>
+<label for="email">E-mailadres</label>
+<input id="email" type="email" autocomplete="username" required>
+<label for="password">Wachtwoord</label>
+<input id="password" type="password" autocomplete="current-password" required>
+<button id="loginButton" type="submit">Inloggen</button>
 </form>
 <p id="loginError" class="error"></p>
 </div>
@@ -94,6 +96,7 @@ th{color:#91a0b8;font-size:11px}
 <div><small class="muted">OPTIVIO CONTROL CENTER</small><h1 id="title">Overzicht</h1></div>
 <button id="refresh">↻ Vernieuwen</button>
 </header>
+<p id="notice"></p>
 
 <section id="overview" class="page active">
 <h1>Platformoverzicht</h1>
@@ -101,12 +104,12 @@ th{color:#91a0b8;font-size:11px}
 <div class="stats">
 <div class="stat"><small>Totale klanten</small><div class="number" id="totalCustomers">0</div></div>
 <div class="stat"><small>Actieve abonnementen</small><div class="number" id="totalSubs">0</div></div>
-<div class="stat"><small>Maandelijkse omzet</small><div class="number" id="revenue">€0</div></div>
+<div class="stat"><small>Maandelijkse abonnementswaarde</small><div class="number" id="revenue">€0</div></div>
 <div class="stat"><small>Betaalde transacties</small><div class="number" id="paidCount">0</div></div>
 </div>
 <div class="grid">
-<div class="card"><h2>Omzetontwikkeling</h2><p>Betaalde transacties per maand</p><div class="chart"><canvas id="revenueChart"></canvas></div></div>
-<div class="card"><h2>Abonnementen per pakket</h2><p>Verdeling van alle pakketten</p><div class="donut"><canvas id="planChart"></canvas></div></div>
+<div class="card"><h2>Omzetontwikkeling</h2><p>Geregistreerde betalingen per maand</p><div class="chart"><canvas id="revenueChart"></canvas></div></div>
+<div class="card"><h2>Abonnementen per pakket</h2><p>Verdeling van de pakketten</p><div class="donut"><canvas id="planChart"></canvas></div></div>
 </div>
 <div class="grid">
 <div class="card"><h2>Klantstatus</h2><p>Verdeling van klanten</p><div class="donut"><canvas id="customerChart"></canvas></div></div>
@@ -115,7 +118,7 @@ th{color:#91a0b8;font-size:11px}
 </section>
 
 <section id="customers" class="page">
-<header><div><h1>Klantenbeheer</h1><p>Beheer jouw aangesloten bedrijven.</p></div><button id="addCustomer">+ Klant toevoegen</button></header>
+<div class="page-header"><h1>Klantenbeheer</h1><p>Beheer aangesloten bedrijven.</p><button id="addCustomer">+ Klant toevoegen</button></div>
 <div class="card">
 <div class="toolbar"><input id="searchCustomer" placeholder="Zoek bedrijf of e-mail"><select id="filterCustomer"><option value="">Alle statussen</option><option value="active">Actief</option><option value="pending">In afwachting</option><option value="suspended">Geschorst</option><option value="cancelled">Geannuleerd</option></select></div>
 <div class="tablewrap"><table><thead><tr><th>Bedrijf</th><th>E-mail</th><th>Status</th><th>Aangemaakt</th><th>Actie</th></tr></thead><tbody id="customersTable"></tbody></table></div>
@@ -123,7 +126,7 @@ th{color:#91a0b8;font-size:11px}
 </section>
 
 <section id="subscriptions" class="page">
-<header><div><h1>Abonnementen</h1><p>Beheer pakketten en maandprijzen.</p></div><button id="addSubscription">+ Abonnement toevoegen</button></header>
+<div class="page-header"><h1>Abonnementen</h1><p>Beheer pakketten en maandprijzen.</p><button id="addSubscription">+ Abonnement toevoegen</button></div>
 <div class="card tablewrap"><table><thead><tr><th>Bedrijf</th><th>Pakket</th><th>Prijs per maand</th><th>Status</th><th>Startdatum</th></tr></thead><tbody id="subscriptionsTable"></tbody></table></div>
 </section>
 
@@ -131,7 +134,7 @@ th{color:#91a0b8;font-size:11px}
 <h1>Betalingen</h1><p>Geregistreerde transacties.</p>
 <div class="stats">
 <div class="stat"><small>Totaal betaald</small><div class="number" id="paidTotal">€0</div></div>
-<div class="stat"><small>Aantal betalingen</small><div class="number" id="paymentTotal">0</div></div>
+<div class="stat"><small>Aantal betaalde transacties</small><div class="number" id="paymentTotal">0</div></div>
 </div>
 <div class="card tablewrap"><table><thead><tr><th>Bedrijf</th><th>Bedrag</th><th>Status</th><th>Referentie</th><th>Datum</th></tr></thead><tbody id="paymentsTable"></tbody></table></div>
 </section>
@@ -165,127 +168,317 @@ th{color:#91a0b8;font-size:11px}
 </div>
 
 <script>
+(function(){
+"use strict";
+
 const SUPABASE_URL="https://aimyxolnmpvxeubxsazm.supabase.co";
 const SUPABASE_KEY="sb_publishable_Ln4wdEu4koLQ4_HqNn5jJg_ryXxprl6";
-const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-const $=id=>document.getElementById(id);
-let customers=[],subs=[],payments=[],visitors=[],activities=[],charts={};
 
-const money=n=>new Intl.NumberFormat('nl-NL',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(n||0));
-const date=v=>v?new Date(v).toLocaleDateString('nl-NL'):'—';
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const status=s=>`<span class="pill ${s==='active'||s==='paid'?'activepill':''}">${esc(s)}</span>`;
+const $=id=>document.getElementById(id);
+const money=n=>new Intl.NumberFormat("nl-NL",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(Number(n||0));
+const date=v=>v?new Date(v).toLocaleDateString("nl-NL"):"—";
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const status=s=>`<span class="pill ${s==="active"||s==="paid"?"activepill":""}">${esc(s)}</span>`;
+
+let db=null;
+let customers=[],subs=[],payments=[],visitors=[],activities=[];
+let charts={};
+
+function message(text){$("notice").textContent=text||"";}
+
+function showLoginError(text){$("loginError").textContent=text||"";}
+
+function showApp(user){
+ $("login").classList.add("hidden");
+ $("app").classList.remove("hidden");
+ $("userEmail").textContent=user.email||"Beheerder";
+}
+
+function showLogin(){
+ $("app").classList.add("hidden");
+ $("login").classList.remove("hidden");
+}
 
 async function fetchRows(table){
- const {data,error}=await db.from(table).select('*').order('created_at',{ascending:false}).limit(1000);
+ const {data,error}=await db.from(table).select("*").order("created_at",{ascending:false}).limit(1000);
  if(error)throw error;
  return data||[];
 }
+
 async function checkAdmin(user){
- const {data,error}=await db.from('platform_admins').select('active').eq('user_id',user.id).maybeSingle();
+ const {data,error}=await db.from("platform_admins")
+  .select("active")
+  .eq("user_id",user.id)
+  .maybeSingle();
  if(error)throw error;
- if(!data||data.active!==true)throw new Error('Dit account heeft geen Super Admin-rechten.');
+ if(!data||data.active!==true)throw new Error("Dit account heeft geen Super Admin-rechten.");
 }
-function showApp(user){
- $('login').classList.add('hidden');$('app').classList.remove('hidden');
- $('userEmail').textContent=user.email||'Beheerder';
-}
-async function login(e){
- e.preventDefault();$('loginButton').disabled=true;$('loginError').textContent='';
- const {data,error}=await db.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});
- $('loginButton').disabled=false;
- if(error){$('loginError').textContent='Inloggen mislukt. Controleer je gegevens.';return}
- try{await checkAdmin(data.user);showApp(data.user);await load()}
- catch(err){await db.auth.signOut();$('loginError').textContent=err.message}
-}
-$('loginForm').addEventListener('submit',login);
-$('logout').onclick=()=>db.auth.signOut();
-db.auth.onAuthStateChange((event)=>{if(event==='SIGNED_OUT'){$('app').classList.add('hidden');$('login').classList.remove('hidden')}});
-db.auth.getSession().then(async({data})=>{if(data.session){try{await checkAdmin(data.session.user);showApp(data.session.user);await load()}catch(e){await db.auth.signOut();$('loginError').textContent=e.message}}});
 
 async function load(){
- $('dbStatus').textContent='Verbinden…';
+ message("Gegevens laden...");
+ $("dbStatus").textContent="Verbinden...";
  try{
-  [customers,subs,payments,visitors,activities]=await Promise.all([
-   fetchRows('platform_customers'),fetchRows('platform_subscriptions'),
-   fetchRows('platform_payments'),fetchRows('platform_visitors'),fetchRows('platform_activity')
+  const results=await Promise.all([
+   fetchRows("platform_customers"),
+   fetchRows("platform_subscriptions"),
+   fetchRows("platform_payments"),
+   fetchRows("platform_visitors"),
+   fetchRows("platform_activity")
   ]);
-  $('dbStatus').textContent='Verbonden';$('authStatus').textContent='Ingelogd';
+  [customers,subs,payments,visitors,activities]=results;
+  $("dbStatus").textContent="Verbonden";
+  $("authStatus").textContent="Ingelogd";
   render();
- }catch(e){$('dbStatus').textContent='Fout';alert('Databasefout: '+e.message)}
+  message("");
+ }catch(error){
+  $("dbStatus").textContent="Fout";
+  message("Databasefout: "+error.message);
+ }
 }
-function chart(id,type,labels,values,colors){
+
+function makeChart(id,type,labels,values,colors){
+ if(!window.Chart)return;
+ const canvas=$(id);
+ if(!canvas)return;
  if(charts[id])charts[id].destroy();
- charts[id]=new Chart($(id),{type,data:{labels,datasets:[{data:values,backgroundColor:colors||'#718cff',borderColor:'#111c2e',borderWidth:3,tension:.35,fill:type==='line'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:type==='doughnut',labels:{color:'#cbd5e1'}}},scales:type==='doughnut'?{}:{x:{ticks:{color:'#91a0b8'},grid:{display:false}},y:{ticks:{color:'#91a0b8'},grid:{color:'#263550'}}}}});
+ charts[id]=new Chart(canvas,{
+  type:type,
+  data:{
+   labels:labels,
+   datasets:[{
+    data:values,
+    backgroundColor:colors,
+    borderColor:"#111c2e",
+    borderWidth:3,
+    tension:.35,
+    fill:type==="line"
+   }]
+  },
+  options:{
+   responsive:true,
+   maintainAspectRatio:false,
+   plugins:{legend:{display:type==="doughnut",labels:{color:"#cbd5e1"}}},
+   scales:type==="doughnut"?{}:{
+    x:{ticks:{color:"#91a0b8"},grid:{display:false}},
+    y:{ticks:{color:"#91a0b8"},grid:{color:"#263550"}}
+   }
+  }
+ });
 }
+
 function render(){
- $('totalCustomers').textContent=customers.length;
- $('totalSubs').textContent=subs.filter(s=>s.status==='active').length;
- $('revenue').textContent=money(subs.filter(s=>s.status==='active').reduce((a,s)=>a+Number(s.price_monthly||0),0));
- $('paidCount').textContent=payments.filter(p=>p.status==='paid').length;
- $('paidTotal').textContent=money(payments.filter(p=>p.status==='paid').reduce((a,p)=>a+Number(p.amount||0),0));
- $('paymentTotal').textContent=payments.filter(p=>p.status==='paid').length;
- $('visitorTotal').textContent=visitors.length;
- $('visitorToday').textContent=visitors.filter(v=>new Date(v.visited_at).toDateString()===new Date().toDateString()).length;
- $('visitorUnique').textContent=new Set(visitors.map(v=>v.visitor_token)).size;
+ $("totalCustomers").textContent=customers.length;
+ $("totalSubs").textContent=subs.filter(s=>s.status==="active").length;
 
- const plans=['starter','professional','enterprise'];
- chart('planChart','doughnut',['Starter','Professional','Enterprise'],plans.map(p=>subs.filter(s=>s.plan===p).length),['#718cff','#4bd6d0','#a78bfa']);
- const states=['active','pending','suspended','cancelled'];
- chart('customerChart','doughnut,['Actief','In afwachting','Geschorst','Geannuleerd'],states.map(s=>customers.filter(c=>c.status===s).length),['#46d39a','#f6c96b','#ff9b71','#ff7185']);
- const months=[],amounts=[];for(let i=11;i>=0;i--){const d=new Date();d.setDate(1);d.setMonth(d.getMonth()-i);months.push(d.toLocaleDateString('nl-NL',{month:'short'}));amounts.push(payments.filter(p=>p.status==='paid'&&new Date(p.created_at).getMonth()===d.getMonth()&&new Date(p.created_at).getFullYear()===d.getFullYear()).reduce((a,p)=>a+Number(p.amount||0),0))}
- chart('revenueChart','line',months,amounts,'#718cff');
- const days=[],visits=[];for(let i=13;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(d.toLocaleDateString('nl-NL',{day:'2-digit',month:'short'}));visits.push(visitors.filter(v=>new Date(v.visited_at).toDateString()===d.toDateString()).length)}
- chart('visitorChart','bar',days,visits,'#4bd6d0');
+ const monthlyValue=subs
+  .filter(s=>s.status==="active")
+  .reduce((sum,s)=>sum+Number(s.price_monthly||0),0);
+ $("revenue").textContent=money(monthlyValue);
 
- $('recentCustomers').innerHTML=customers.slice(0,5).map(c=>`<p>${esc(c.company_name)} · ${status(c.status)}</p>`).join('')||'Nog geen klanten.';
- renderCustomers();renderSubs();renderPayments();renderActivities();
+ const paid=payments.filter(p=>p.status==="paid");
+ $("paidCount").textContent=paid.length;
+ $("paidTotal").textContent=money(paid.reduce((sum,p)=>sum+Number(p.amount||0),0));
+ $("paymentTotal").textContent=paid.length;
+
+ $("visitorTotal").textContent=visitors.length;
+ $("visitorToday").textContent=visitors.filter(v=>v.visited_at&&new Date(v.visited_at).toDateString()===new Date().toDateString()).length;
+ $("visitorUnique").textContent=new Set(visitors.map(v=>v.visitor_token).filter(Boolean)).size;
+
+ const plans=["starter","professional","enterprise"];
+ makeChart("planChart","doughnut",
+  ["Starter","Professional","Enterprise"],
+  plans.map(p=>subs.filter(s=>s.plan===p).length),
+  ["#718cff","#4bd6d0","#a78bfa"]
+ );
+
+ const states=["active","pending","suspended","cancelled"];
+ makeChart("customerChart","doughnut",
+  ["Actief","In afwachting","Geschorst","Geannuleerd"],
+  states.map(s=>customers.filter(c=>c.status===s).length),
+  ["#46d39a","#f6c96b","#ff9b71","#ff7185"]
+ );
+
+ const months=[],amounts=[];
+ for(let i=11;i>=0;i--){
+  const d=new Date();
+  d.setDate(1);
+  d.setMonth(d.getMonth()-i);
+  months.push(d.toLocaleDateString("nl-NL",{month:"short"}));
+  amounts.push(paid.filter(p=>{
+   const pd=new Date(p.created_at);
+   return pd.getMonth()===d.getMonth()&&pd.getFullYear()===d.getFullYear();
+  }).reduce((sum,p)=>sum+Number(p.amount||0),0));
+ }
+ makeChart("revenueChart","line",months,amounts,"#718cff");
+
+ const days=[],visits=[];
+ for(let i=13;i>=0;i--){
+  const d=new Date();
+  d.setDate(d.getDate()-i);
+  days.push(d.toLocaleDateString("nl-NL",{day:"2-digit",month:"short"}));
+  visits.push(visitors.filter(v=>v.visited_at&&new Date(v.visited_at).toDateString()===d.toDateString()).length);
+ }
+ makeChart("visitorChart","bar",days,visits,"#4bd6d0");
+
+ $("recentCustomers").innerHTML=customers.slice(0,5).map(c=>`<p>${esc(c.company_name)} · ${status(c.status)}</p>`).join("")||"Nog geen klanten.";
+ renderCustomers();
+ renderSubscriptions();
+ renderPayments();
+ renderActivities();
 }
+
 function renderCustomers(){
- const q=$('searchCustomer').value.toLowerCase(),f=$('filterCustomer').value;
- const rows=customers.filter(c=>(!f||c.status===f)&&(`${c.company_name} ${c.owner_email}`).toLowerCase().includes(q));
- $('customersTable').innerHTML=rows.map(c=>`<tr><td>${esc(c.company_name)}</td><td>${esc(c.owner_email)}</td><td>${status(c.status)}</td><td>${date(c.created_at)}</td><td><button data-customer="${c.id}">Status wijzigen</button></td></tr>`).join('')||'<tr><td colspan="5" class="empty">Geen klanten gevonden.</td></tr>';
+ const q=$("searchCustomer").value.toLowerCase();
+ const filter=$("filterCustomer").value;
+ const rows=customers.filter(c=>
+  (!filter||c.status===filter)&&
+  (`${c.company_name||""} ${c.owner_email||""}`).toLowerCase().includes(q)
+ );
+ $("customersTable").innerHTML=rows.map(c=>
+  `<tr><td>${esc(c.company_name)}</td><td>${esc(c.owner_email)}</td><td>${status(c.status)}</td><td>${date(c.created_at)}</td><td><button data-customer="${esc(c.id)}">Status wijzigen</button></td></tr>`
+ ).join("")||'<tr><td colspan="5" class="empty">Geen klanten gevonden.</td></tr>';
 }
-function renderSubs(){
- $('subscriptionsTable').innerHTML=subs.map(s=>{const c=customers.find(c=>c.id===s.customer_id);return `<tr><td>${esc(c?.company_name||'Onbekend')}</td><td>${esc(s.plan)}</td><td>${money(s.price_monthly)}</td><td>${status(s.status)}</td><td>${date(s.start_date)}</td></tr>`}).join('')||'<tr><td colspan="5" class="empty">Geen abonnementen.</td></tr>';
-}
-function renderPayments(){
- $('paymentsTable').innerHTML=payments.map(p=>{const c=customers.find(c=>c.id===p.customer_id);return `<tr><td>${esc(c?.company_name||'Onbekend')}</td><td>${money(p.amount)}</td><td>${status(p.status)}</td><td>${esc(p.provider_reference||'—')}</td><td>${date(p.created_at)}</td></tr>`}).join('')||'<tr><td colspan="5" class="empty">Geen betalingen.</td></tr>';
-}
-function renderActivities(){
- $('activityTable').innerHTML=activities.map(a=>`<tr><td>${esc(a.event_type)}</td><td>${esc(a.description)}</td><td>${esc(a.customer_id||'—')}</td><td>${date(a.created_at)}</td></tr>`).join('')||'<tr><td colspan="4" class="empty">Geen activiteiten.</td></tr>';
-}
-$('refresh').onclick=load;
-document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>{
- document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
- $(b.dataset.page).classList.add('active');
- document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));
- b.classList.add('active');$('title').textContent=b.textContent.trim();
-});
-$('searchCustomer').oninput=renderCustomers;$('filterCustomer').onchange=renderCustomers;
 
-$('addCustomer').onclick=async()=>{
- const company_name=prompt('Bedrijfsnaam?');if(!company_name)return;
- const owner_email=prompt('E-mailadres eigenaar?');if(!owner_email)return;
- const {error}=await db.from('platform_customers').insert({company_name,owner_email,status:'pending'});
- if(error)alert(error.message);else await load();
-};
-$('addSubscription').onclick=async()=>{
- if(!customers.length){alert('Voeg eerst een klant toe.');return}
- const list=customers.map((c,i)=>`${i+1}. ${c.company_name}`).join('\n');
- const choice=Number(prompt('Kies klantnummer:\n'+list));if(!choice||!customers[choice-1])return;
- const plan=prompt('Pakket: starter, professional of enterprise','starter');if(!['starter','professional','enterprise'].includes(plan))return;
- const price=Number(prompt('Prijs per maand in euro','29'));if(!Number.isFinite(price)||price<0)return;
- const {error}=await db.from('platform_subscriptions').insert({customer_id:customers[choice-1].id,plan,price_monthly:price,status:'pending',start_date:new Date().toISOString()});
- if(error)alert(error.message);else await load();
-};
-$('customersTable').onclick=async e=>{
- const id=e.target.dataset.customer;if(!id)return;
- const c=customers.find(x=>x.id===id);const states=['pending','active','suspended','cancelled'];const next=states[(states.indexOf(c.status)+1)%states.length];
- const {error}=await db.from('platform_customers').update({status:next}).eq('id',id);
- if(error)alert(error.message);else await load();
-};
+function renderSubscriptions(){
+ $("subscriptionsTable").innerHTML=subs.map(s=>{
+  const c=customers.find(x=>x.id===s.customer_id);
+  return `<tr><td>${esc(c?.company_name||"Onbekend")}</td><td>${esc(s.plan)}</td><td>${money(s.price_monthly)}</td><td>${status(s.status)}</td><td>${date(s.start_date)}</td></tr>`;
+ }).join("")||'<tr><td colspan="5" class="empty">Geen abonnementen.</td></tr>';
+}
+
+function renderPayments(){
+ $("paymentsTable").innerHTML=payments.map(p=>{
+  const c=customers.find(x=>x.id===p.customer_id);
+  return `<tr><td>${esc(c?.company_name||"Onbekend")}</td><td>${money(p.amount)}</td><td>${status(p.status)}</td><td>${esc(p.provider_reference||"—")}</td><td>${date(p.created_at)}</td></tr>`;
+ }).join("")||'<tr><td colspan="5" class="empty">Geen betalingen.</td></tr>';
+}
+
+function renderActivities(){
+ $("activityTable").innerHTML=activities.map(a=>
+  `<tr><td>${esc(a.event_type)}</td><td>${esc(a.description)}</td><td>${esc(a.customer_id||"—")}</td><td>${date(a.created_at)}</td></tr>`
+ ).join("")||'<tr><td colspan="4" class="empty">Geen activiteiten.</td></tr>';
+}
+
+async function login(event){
+ event.preventDefault();
+ showLoginError("");
+ $("loginButton").disabled=true;
+ try{
+  const {data,error}=await db.auth.signInWithPassword({
+   email:$("email").value.trim(),
+   password:$("password").value
+  });
+  if(error)throw error;
+  await checkAdmin(data.user);
+  showApp(data.user);
+  await load();
+ }catch(error){
+  await db.auth.signOut();
+  showLoginError(error.message||"Inloggen mislukt.");
+ }finally{
+  $("loginButton").disabled=false;
+ }
+}
+
+async function logout(){
+ await db.auth.signOut();
+ showLogin();
+}
+
+async function addCustomer(){
+ const company_name=prompt("Bedrijfsnaam?");
+ if(!company_name||!company_name.trim())return;
+ const owner_email=prompt("E-mailadres eigenaar?");
+ if(!owner_email||!owner_email.trim())return;
+ const {error}=await db.from("platform_customers").insert({
+  company_name:company_name.trim(),
+  owner_email:owner_email.trim(),
+  status:"pending"
+ });
+ if(error){message("Fout: "+error.message);return;}
+ await load();
+}
+
+async function addSubscription(){
+ if(!customers.length){alert("Voeg eerst een klant toe.");return;}
+ const list=customers.map((c,i)=>`${i+1}. ${c.company_name}`).join("\n");
+ const choice=Number(prompt("Kies klantnummer:\n"+list));
+ if(!Number.isInteger(choice)||choice<1||choice>customers.length)return;
+ const plan=prompt("Pakket: starter, professional of enterprise","starter");
+ if(!["starter","professional","enterprise"].includes(plan))return;
+ const price=Number(prompt("Prijs per maand in euro","29"));
+ if(!Number.isFinite(price)||price<0)return;
+ const {error}=await db.from("platform_subscriptions").insert({
+  customer_id:customers[choice-1].id,
+  plan:plan,
+  price_monthly:price,
+  status:"pending",
+  start_date:new Date().toISOString()
+ });
+ if(error){message("Fout: "+error.message);return;}
+ await load();
+}
+
+async function changeCustomerStatus(event){
+ const id=event.target.dataset.customer;
+ if(!id)return;
+ const customer=customers.find(c=>c.id===id);
+ if(!customer)return;
+ const states=["pending","active","suspended","cancelled"];
+ const current=states.indexOf(customer.status);
+ const next=states[(current+1)%states.length];
+ const {error}=await db.from("platform_customers").update({status:next}).eq("id",id);
+ if(error){message("Fout: "+error.message);return;}
+ await load();
+}
+
+function setupNavigation(){
+ document.querySelectorAll("[data-page]").forEach(button=>{
+  button.addEventListener("click",()=>{
+   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+   $(button.dataset.page).classList.add("active");
+   document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+   button.classList.add("active");
+   $("title").textContent=button.textContent.trim();
+  });
+ });
+}
+
+async function start(){
+ if(!window.supabase||!window.supabase.createClient){
+  showLoginError("Supabase kon niet laden. Controleer je internetverbinding.");
+  return;
+ }
+ db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+
+ $("loginForm").addEventListener("submit",login);
+ $("logout").addEventListener("click",logout);
+ $("refresh").addEventListener("click",load);
+ $("addCustomer").addEventListener("click",addCustomer);
+ $("addSubscription").addEventListener("click",addSubscription);
+ $("customersTable").addEventListener("click",changeCustomerStatus);
+ $("searchCustomer").addEventListener("input",renderCustomers);
+ $("filterCustomer").addEventListener("change",renderCustomers);
+ setupNavigation();
+
+ const {data,error}=await db.auth.getSession();
+ if(error){showLoginError(error.message);return;}
+ if(data.session){
+  try{
+   await checkAdmin(data.session.user);
+   showApp(data.session.user);
+   await load();
+  }catch(error){
+   await db.auth.signOut();
+   showLoginError(error.message);
+  }
+ }
+}
+
+start().catch(error=>{
+ showLoginError("Er ging iets mis: "+error.message);
+});
+})();
 </script>
 </body>
 </html>
-
