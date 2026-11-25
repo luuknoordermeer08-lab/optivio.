@@ -1,1 +1,129 @@
 
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Optivio Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 40px;
+      background: #f3f6fb;
+      color: #17243b;
+      font-family: Arial, sans-serif;
+    }
+    .container {
+      max-width: 850px;
+      margin: auto;
+    }
+    .panel {
+      background: white;
+      padding: 25px;
+      border-radius: 14px;
+      margin-top: 20px;
+      box-shadow: 0 4px 20px #00000008;
+    }
+    button {
+      background: #1769e0;
+      color: white;
+      border: 0;
+      padding: 12px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    pre {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Optivio Dashboard</h1>
+    <p id="status">Beveiligde verbinding controleren...</p>
+
+    <div class="panel">
+      <h2>Bedrijfsgegevens</h2>
+      <div id="gegevens">Laden...</div>
+    </div>
+
+    <button id="logout">Uitloggen</button>
+  </div>
+
+  <script>
+    const SUPABASE_URL = "https://vcgcowklqvfektlyzmia.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_6LEmGg5LMjgNoHHJDYmzfg_vzKf13Ry";
+
+    const db = window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY
+    );
+
+    async function startDashboard() {
+      const status = document.getElementById("status");
+      const gegevens = document.getElementById("gegevens");
+
+      const { data: sessionData, error: sessionError } =
+        await db.auth.getSession();
+
+      if (sessionError || !sessionData.session) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      const user = sessionData.session.user;
+
+      status.textContent = "Ingelogd. Toegang controleren...";
+
+      const { data: memberships, error: memberError } = await db
+        .from("company_members")
+        .select("company_id, role")
+        .eq("user_id", user.id);
+
+      if (memberError || !memberships || memberships.length === 0) {
+        status.textContent = "Geen toegang tot een bedrijfsaccount.";
+        gegevens.textContent = "Toegang geweigerd.";
+        return;
+      }
+
+      const companyIds = memberships.map(m => m.company_id);
+
+      const { data: records, error: dataError } = await db
+        .from("company_data")
+        .select("id, data, created_at")
+        .in("company_id", companyIds);
+
+      if (dataError) {
+        status.textContent = "Fout bij ophalen van gegevens.";
+        gegevens.textContent = dataError.message;
+        return;
+      }
+
+      status.textContent = "Beveiligde verbinding actief.";
+
+      if (!records || records.length === 0) {
+        gegevens.textContent = "Geen bedrijfsgegevens gevonden.";
+        return;
+      }
+
+      gegevens.innerHTML = "";
+
+      records.forEach(record => {
+        const pre = document.createElement("pre");
+        pre.textContent = JSON.stringify(record.data, null, 2);
+        gegevens.appendChild(pre);
+      });
+    }
+
+    document.getElementById("logout").addEventListener("click", async () => {
+      await db.auth.signOut();
+      window.location.href = "login.html";
+    });
+
+    startDashboard();
+  </script>
+</body>
+</html>
+
