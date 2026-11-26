@@ -4,276 +4,313 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Optivio | Klantlogin</title>
-
+<title>Optivio | Klantomgeving</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
-* {
-  box-sizing: border-box;
+*{box-sizing:border-box}
+body{
+  margin:0;min-height:100vh;display:flex;align-items:center;
+  justify-content:center;padding:24px;background:#f3f6fb;
+  font-family:Arial,sans-serif;color:#17243b
 }
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  background: #f3f6fb;
-  font-family: Arial, sans-serif;
-  color: #17243b;
+.login{
+  width:100%;max-width:460px;padding:42px;background:white;
+  border-radius:20px;box-shadow:0 15px 50px #17243b12
 }
-
-.login {
-  width: 100%;
-  max-width: 430px;
-  padding: 42px;
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 15px 50px #17243b12;
+.logo{color:#1769e0;font-size:29px;font-weight:800;letter-spacing:-1px}
+.tagline{color:#8793a5;font-size:12px;margin-top:5px}
+h1{font-size:26px;margin:35px 0 8px}
+.subtitle{color:#718096;font-size:14px;line-height:1.6}
+label{display:block;font-size:13px;font-weight:bold;margin:20px 0 8px}
+input{
+  width:100%;padding:14px;border:1px solid #dce3ed;
+  border-radius:9px;font-size:14px;outline:none
 }
-
-.logo {
-  color: #1769e0;
-  font-size: 29px;
-  font-weight: 800;
-  letter-spacing: -1px;
+input:focus{border-color:#1769e0;box-shadow:0 0 0 3px #1769e015}
+button{
+  width:100%;padding:15px;margin-top:24px;background:#1769e0;
+  color:white;border:0;border-radius:9px;font-size:15px;
+  font-weight:bold;cursor:pointer
 }
-
-.tagline {
-  color: #8793a5;
-  font-size: 12px;
-  margin-top: 5px;
+button:disabled{opacity:.6;cursor:wait}
+.switch{
+  display:block;text-align:center;margin-top:20px;color:#1769e0;
+  font-size:13px;text-decoration:none;cursor:pointer
 }
-
-h1 {
-  font-size: 26px;
-  margin: 35px 0 8px;
+.forgot{
+  display:block;text-align:right;margin-top:15px;color:#1769e0;
+  font-size:13px;text-decoration:none
 }
-
-.subtitle {
-  color: #718096;
-  font-size: 14px;
-  line-height: 1.6;
+#message{
+  display:none;margin-top:18px;padding:12px;border-radius:8px;
+  font-size:13px;line-height:1.5;overflow-wrap:anywhere
 }
-
-label {
-  display: block;
-  font-size: 13px;
-  font-weight: bold;
-  margin: 22px 0 8px;
-}
-
-input {
-  width: 100%;
-  padding: 15px;
-  border: 1px solid #dce3ed;
-  border-radius: 9px;
-  font-size: 15px;
-  outline: none;
-}
-
-input:focus {
-  border-color: #1769e0;
-  box-shadow: 0 0 0 3px #1769e015;
-}
-
-button {
-  width: 100%;
-  padding: 15px;
-  margin-top: 25px;
-  background: #1769e0;
-  color: white;
-  border: none;
-  border-radius: 9px;
-  font-size: 15px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-button:disabled {
-  opacity: .6;
-  cursor: wait;
-}
-
-.forgot {
-  display: block;
-  text-align: right;
-  margin-top: 15px;
-  color: #1769e0;
-  font-size: 13px;
-  text-decoration: none;
-}
-
-#message {
-  display: none;
-  margin-top: 18px;
-  padding: 12px;
-  border-radius: 8px;
-  font-size: 13px;
-  line-height: 1.5;
-  overflow-wrap: anywhere;
-}
-
-.footer {
-  text-align: center;
-  margin-top: 35px;
-  color: #9aa5b5;
-  font-size: 12px;
-}
-
-@media(max-width:480px) {
-  .login {
-    padding: 28px 23px;
-  }
-}
+.footer{text-align:center;margin-top:35px;color:#9aa5b5;font-size:12px}
+.hidden{display:none!important}
+@media(max-width:480px){.login{padding:28px 23px}}
 </style>
 </head>
 
 <body>
-
 <div class="login">
 
   <div class="logo">OPTIVIO.</div>
   <div class="tagline">YOUR BUSINESS. ORGANIZED.</div>
 
-  <h1>Welkom terug</h1>
-  <p class="subtitle">
-    Log in op jouw persoonlijke en beveiligde bedrijfsomgeving.
-  </p>
+  <div id="loginSection">
+    <h1>Welkom terug</h1>
+    <p class="subtitle">Log in op jouw persoonlijke en beveiligde bedrijfsomgeving.</p>
 
-  <form id="loginForm">
+    <form id="loginForm">
+      <label for="loginEmail">E-mailadres</label>
+      <input id="loginEmail" type="email" placeholder="naam@bedrijf.nl" autocomplete="username" required>
 
-    <label for="email">E-mailadres</label>
-    <input
-      id="email"
-      type="email"
-      placeholder="naam@bedrijf.nl"
-      autocomplete="username"
-      required
-    >
+      <label for="loginPassword">Wachtwoord</label>
+      <input id="loginPassword" type="password" placeholder="Jouw wachtwoord" autocomplete="current-password" required>
 
-    <label for="password">Wachtwoord</label>
-    <input
-      id="password"
-      type="password"
-      placeholder="Jouw wachtwoord"
-      autocomplete="current-password"
-      required
-    >
+      <button id="loginButton" type="submit">Inloggen</button>
+    </form>
 
-    <button id="submitButton" type="submit">
-      Inloggen
-    </button>
+    <a href="#" class="forgot" id="forgotPassword">Wachtwoord vergeten?</a>
+    <a class="switch" id="showRegister">Nog geen account? Maak een account aan</a>
+  </div>
 
-  </form>
+  <div id="registerSection" class="hidden">
+    <h1>Start met Optivio</h1>
+    <p class="subtitle">Maak jouw bedrijfsomgeving aan. Je kunt daarna direct aan de slag.</p>
 
-  <a href="#" class="forgot" id="forgotPassword">
-    Wachtwoord vergeten?
-  </a>
+    <form id="registerForm">
+      <label for="firstName">Voornaam</label>
+      <input id="firstName" type="text" placeholder="Jouw voornaam" autocomplete="given-name" required>
+
+      <label for="lastName">Achternaam</label>
+      <input id="lastName" type="text" placeholder="Jouw achternaam" autocomplete="family-name" required>
+
+      <label for="companyName">Bedrijfsnaam</label>
+      <input id="companyName" type="text" placeholder="Bijvoorbeeld: Jansen B.V." required>
+
+      <label for="registerEmail">Zakelijk e-mailadres</label>
+      <input id="registerEmail" type="email" placeholder="naam@bedrijf.nl" autocomplete="email" required>
+
+      <label for="registerPassword">Wachtwoord</label>
+      <input id="registerPassword" type="password" placeholder="Minimaal 8 tekens" minlength="8" autocomplete="new-password" required>
+
+      <label for="confirmPassword">Herhaal wachtwoord</label>
+      <input id="confirmPassword" type="password" placeholder="Herhaal je wachtwoord" minlength="8" autocomplete="new-password" required>
+
+      <button id="registerButton" type="submit">Bedrijfsaccount aanmaken</button>
+    </form>
+
+    <a class="switch" id="showLogin">Heb je al een account? Log in</a>
+  </div>
 
   <div id="message" role="status" aria-live="polite"></div>
 
-  <div class="footer">
-    © 2026 Optivio · Beveiligde klantomgeving
-  </div>
-
+  <div class="footer">© 2026 Optivio · Beveiligde klantomgeving</div>
 </div>
 
 <script>
-const SUPABASE_URL =
-  "https://vcgcowklqvfektlyzmia.supabase.co";
-
-const SUPABASE_KEY =
-  "sb_publishable_6LEmGg5LMjgNoHHJDYmzfg_vzKf13Ry";
+const SUPABASE_URL = "https://vcgcowklqvfektlyzmia.supabase.co";
+const SUPABASE_KEY = "sb_publishable_6LEmGg5LMjgNoHHJDYmzfg_vzKf13Ry";
 
 const message = document.getElementById("message");
-const button = document.getElementById("submitButton");
-const form = document.getElementById("loginForm");
+const loginButton = document.getElementById("loginButton");
+const registerButton = document.getElementById("registerButton");
 
-function showMessage(text, success = false) {
-  message.style.display = "block";
-  message.style.background = success ? "#e8f7ee" : "#fff0f0";
-  message.style.color = success ? "#16834a" : "#c62828";
-  message.textContent = text;
+const loginSection = document.getElementById("loginSection");
+const registerSection = document.getElementById("registerSection");
+
+function showMessage(text, success=false){
+  message.style.display="block";
+  message.style.background=success?"#e8f7ee":"#fff0f0";
+  message.style.color=success?"#16834a":"#c62828";
+  message.textContent=text;
 }
 
-if (!window.supabase) {
+function clearMessage(){
+  message.style.display="none";
+  message.textContent="";
+}
+
+function setMode(mode){
+  clearMessage();
+  loginSection.classList.toggle("hidden",mode!=="login");
+  registerSection.classList.toggle("hidden",mode!=="register");
+}
+
+document.getElementById("showRegister").addEventListener("click",()=>setMode("register"));
+document.getElementById("showLogin").addEventListener("click",()=>setMode("login"));
+
+if(!window.supabase){
   showMessage("De beveiligde verbinding kon niet worden geladen. Vernieuw de pagina.");
-} else {
+}else{
 
-  const db = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+  const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
-  form.addEventListener("submit", async (event) => {
+  async function finishCompanySetup(user){
+    const {data:members,error:memberError}=await db
+      .from("company_members")
+      .select("company_id")
+      .eq("user_id",user.id);
+
+    if(memberError)throw memberError;
+
+    if(members&&members.length>0){
+      if(members.length>1){
+        throw new Error("Dit account is aan meerdere bedrijven gekoppeld. Neem contact op met de beheerder.");
+      }
+      return;
+    }
+
+    const companyName=user.user_metadata?.company_name;
+
+    if(!companyName){
+      throw new Error("Er is nog geen bedrijfsnaam aan dit account gekoppeld. Neem contact op met de beheerder.");
+    }
+
+    const {error}=await db.rpc("create_company_for_user",{
+      company_name:companyName
+    });
+
+    if(error)throw error;
+  }
+
+  document.getElementById("loginForm").addEventListener("submit",async event=>{
     event.preventDefault();
 
-    button.disabled = true;
-    button.textContent = "Bezig met inloggen...";
-    message.style.display = "none";
+    loginButton.disabled=true;
+    loginButton.textContent="Bezig met inloggen...";
+    clearMessage();
 
-    try {
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
+    try{
+      const email=document.getElementById("loginEmail").value.trim();
+      const password=document.getElementById("loginPassword").value;
 
-      const { data, error } = await db.auth.signInWithPassword({
-        email,
-        password
-      });
+      const {data,error}=await db.auth.signInWithPassword({email,password});
+      if(error)throw error;
 
-      if (error) throw error;
-
-      if (!data.session) {
+      if(!data.user||!data.session){
         throw new Error("Geen actieve inlogsessie gevonden.");
       }
 
-      showMessage("Inloggen gelukt. Dashboard openen...", true);
+      showMessage("Account controleren en bedrijfsomgeving laden...",true);
+
+      await finishCompanySetup(data.user);
 
       window.location.replace("/dashboard.html");
 
-    } catch (error) {
+    }catch(error){
       showMessage(error.message);
-      button.disabled = false;
-      button.textContent = "Inloggen";
+      loginButton.disabled=false;
+      loginButton.textContent="Inloggen";
     }
   });
 
-  document.getElementById("forgotPassword").addEventListener(
-    "click",
-    async (event) => {
-      event.preventDefault();
+  document.getElementById("registerForm").addEventListener("submit",async event=>{
+    event.preventDefault();
 
-      const email = document.getElementById("email").value.trim();
+    registerButton.disabled=true;
+    registerButton.textContent="Account aanmaken...";
+    clearMessage();
 
-      if (!email) {
-        showMessage("Vul eerst je e-mailadres in.");
-        document.getElementById("email").focus();
-        return;
+    try{
+      const firstName=document.getElementById("firstName").value.trim();
+      const lastName=document.getElementById("lastName").value.trim();
+      const companyName=document.getElementById("companyName").value.trim();
+      const email=document.getElementById("registerEmail").value.trim();
+      const password=document.getElementById("registerPassword").value;
+      const confirmPassword=document.getElementById("confirmPassword").value;
+
+      if(!firstName||!lastName||!companyName){
+        throw new Error("Vul alle gegevens in.");
       }
 
-      try {
-        const { error } = await db.auth.resetPasswordForEmail(email, {
-          redirectTo: window.location.origin + "/reset-password.html"
-        });
+      if(companyName.length<2){
+        throw new Error("Vul een geldige bedrijfsnaam in.");
+      }
 
-        if (error) throw error;
+      if(password.length<8){
+        throw new Error("Je wachtwoord moet minimaal 8 tekens bevatten.");
+      }
 
+      if(password!==confirmPassword){
+        throw new Error("De wachtwoorden komen niet overeen.");
+      }
+
+      const {data,error}=await db.auth.signUp({
+        email,
+        password,
+        options:{
+          data:{
+            first_name:firstName,
+            last_name:lastName,
+            full_name:firstName+" "+lastName,
+            company_name:companyName
+          },
+          emailRedirectTo:window.location.origin+"/login.html"
+        }
+      });
+
+      if(error)throw error;
+
+      if(!data.user){
+        throw new Error("Het account kon niet worden aangemaakt.");
+      }
+
+      if(data.session){
+        await finishCompanySetup(data.user);
+
+        showMessage("Je account en bedrijf zijn aangemaakt. Je wordt doorgestuurd...",true);
+
+        window.location.replace("/dashboard.html");
+      }else{
         showMessage(
-          "Als dit e-mailadres bij een account hoort, ontvang je een herstelmail.",
+          "Je account is aangemaakt. Controleer je e-mail en bevestig je adres. Daarna kun je inloggen. Optivio maakt dan automatisch jouw bedrijfsomgeving aan.",
           true
         );
 
-      } catch (error) {
-        showMessage(error.message);
+        document.getElementById("loginEmail").value=email;
+        setMode("login");
+        showMessage(
+          "Controleer je e-mail en bevestig je account. Daarna kun je hier inloggen om jouw bedrijfsomgeving aan te maken.",
+          true
+        );
       }
-    }
-  );
 
+    }catch(error){
+      showMessage(error.message);
+    }finally{
+      registerButton.disabled=false;
+      registerButton.textContent="Bedrijfsaccount aanmaken";
+    }
+  });
+
+  document.getElementById("forgotPassword").addEventListener("click",async event=>{
+    event.preventDefault();
+
+    const email=document.getElementById("loginEmail").value.trim();
+
+    if(!email){
+      showMessage("Vul eerst je e-mailadres in.");
+      document.getElementById("loginEmail").focus();
+      return;
+    }
+
+    try{
+      const {error}=await db.auth.resetPasswordForEmail(email,{
+        redirectTo:window.location.origin+"/reset-password.html"
+      });
+
+      if(error)throw error;
+
+      showMessage("Als dit e-mailadres bij een account hoort, ontvang je een herstelmail.",true);
+
+    }catch(error){
+      showMessage(error.message);
+    }
+  });
 }
 </script>
-
 </body>
 </html>
