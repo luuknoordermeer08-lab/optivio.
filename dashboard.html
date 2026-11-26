@@ -7,13 +7,14 @@
 <title>Optivio | Bedrijfsbeheer</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root {
+:root{
   --bg:#f4f6fa;--white:#fff;--navy:#14233b;--blue:#3867ed;
   --text:#19243a;--muted:#8290a5;--border:#e8edf4;
   --green:#15966b;--red:#df5353;--orange:#e49a32;
+  --soft:#edf2ff;--table-head:#fafbfd;--result:#f0f4ff;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);font-family:Inter,Arial,sans-serif;color:var(--text)}
+body{margin:0;background:var(--bg);font-family:Inter,Arial,sans-serif;color:var(--text);transition:background .2s,color .2s}
 button,input,select{font:inherit}
 button{cursor:pointer}
 .layout{display:flex;min-height:100vh}
@@ -29,7 +30,7 @@ button{cursor:pointer}
 .avatar{width:36px;height:36px;border-radius:11px;background:#38558a;display:grid;place-items:center;font-weight:700}
 .user-mini small{display:block;color:#aab8ce;margin-top:4px;font-size:11px}
 .main{flex:1;min-width:0}
-.topbar{height:72px;background:white;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 35px}
+.topbar{height:72px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 35px}
 .topbar small{color:var(--muted)}
 .top-right{display:flex;align-items:center;gap:14px;font-size:12px}
 .status-dot{width:8px;height:8px;background:#23b77d;border-radius:50%;display:inline-block;margin-right:6px}
@@ -40,12 +41,12 @@ h1{font-size:25px;margin:0 0 7px;letter-spacing:-.6px}
 .btn{border:0;border-radius:8px;padding:11px 16px;font-size:12px;font-weight:650}
 .primary{background:var(--blue);color:white}
 .primary:hover{background:#2853d2}
-.secondary{background:white;border:1px solid var(--border);color:var(--text)}
+.secondary{background:var(--white);border:1px solid var(--border);color:var(--text)}
 .danger{background:#fff0f0;color:var(--red)}
 .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:20px}
-.card{background:white;border:1px solid var(--border);border-radius:13px;padding:20px;min-width:0}
+.card{background:var(--white);border:1px solid var(--border);border-radius:13px;padding:20px;min-width:0}
 .stat-top{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:12px}
-.stat-icon{width:36px;height:36px;border-radius:10px;background:#edf2ff;display:grid;place-items:center;font-size:17px}
+.stat-icon{width:36px;height:36px;border-radius:10px;background:var(--soft);display:grid;place-items:center;font-size:17px}
 .stat-value{font-size:26px;font-weight:750;margin:15px 0 6px;letter-spacing:-.8px}
 .stat-note{font-size:11px;color:var(--muted)}
 .green{color:var(--green)}.red{color:var(--red)}.orange{color:var(--orange)}
@@ -53,45 +54,67 @@ h1{font-size:25px;margin:0 0 7px;letter-spacing:-.6px}
 .card-title{font-size:14px;font-weight:700;margin-bottom:5px}
 .card-sub{font-size:11px;color:var(--muted)}
 .chart{height:190px;display:flex;align-items:end;gap:12px;padding:20px 5px 0}
-.bar-wrap{height:100%;flex:1;display:flex;flex-direction:column;justify-content:end;align-items:center;gap:8px}
+.bar-wrap{height:100%;flex:1;display:flex;flex-direction:column;justify-content:end;align-items:center;gap:8px;min-width:0}
 .bar{width:100%;max-width:42px;background:#dce6ff;border-radius:6px 6px 2px 2px;min-height:4px}
 .bar.highlight{background:var(--blue)}
-.bar-label{font-size:10px;color:var(--muted)}
-.alert-row{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid var(--border);font-size:12px}
+.bar-label{font-size:10px;color:var(--muted);overflow:hidden;max-width:100%;white-space:nowrap}
+.alert-row{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid var(--border);font-size:12px;gap:10px}
 .alert-row:last-child{border:0}
 .pill{padding:5px 8px;border-radius:20px;font-size:10px;font-weight:700;background:#e9f8f1;color:var(--green)}
 .pill.low{background:#fff4e5;color:#b87513}
 .pill.out{background:#ffeded;color:var(--red)}
-.table-card{background:white;border:1px solid var(--border);border-radius:13px;overflow:hidden}
+.table-card{background:var(--white);border:1px solid var(--border);border-radius:13px;overflow:hidden}
 .table-head{padding:19px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .tools{display:flex;gap:9px;flex-wrap:wrap}
-.search{border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:12px;min-width:210px;outline:none}
+.search{border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:12px;min-width:210px;outline:none;background:var(--white);color:var(--text)}
 .search:focus,input:focus,select:focus{border-color:var(--blue)}
 table{width:100%;border-collapse:collapse;text-align:left}
-th{font-size:10px;color:var(--muted);font-weight:650;background:#fafbfd;padding:13px 17px;white-space:nowrap}
+th{font-size:10px;color:var(--muted);font-weight:650;background:var(--table-head);padding:13px 17px;white-space:nowrap}
 td{padding:14px 17px;border-top:1px solid var(--border);font-size:12px;white-space:nowrap}
 .product-name{font-weight:700}.product-sku{font-size:10px;color:var(--muted);margin-top:4px}
 .table-scroll{overflow-x:auto}
 .actions{display:flex;gap:6px}
-.small-btn{border:1px solid var(--border);background:white;border-radius:6px;padding:6px 9px;font-size:11px}
+.small-btn{border:1px solid var(--border);background:var(--white);color:var(--text);border-radius:6px;padding:6px 9px;font-size:11px}
 .empty{text-align:center;padding:45px 15px;color:var(--muted);font-size:13px}
 .page{display:none}.page.active{display:block}
 .calc-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
 .field{margin:15px 0}
 .field label{display:block;font-size:11px;color:var(--muted);margin-bottom:7px}
-.field input,.field select{width:100%;padding:11px;border:1px solid var(--border);border-radius:8px;outline:none;font-size:13px}
-.result{background:#f0f4ff;border-radius:9px;padding:15px;margin-top:15px}
+.field input,.field select{width:100%;padding:11px;border:1px solid var(--border);border-radius:8px;outline:none;font-size:13px;background:var(--white);color:var(--text)}
+.result{background:var(--result);border-radius:9px;padding:15px;margin-top:15px}
 .result small{color:var(--muted);font-size:11px}
 .result strong{display:block;font-size:23px;margin-top:5px;color:var(--blue)}
 .notice{padding:14px 16px;border-radius:9px;background:#edf3ff;color:#3557a0;font-size:12px;margin-bottom:18px}
 .modal-bg{display:none;position:fixed;inset:0;background:#101b2b88;z-index:5;align-items:center;justify-content:center;padding:15px}
 .modal-bg.open{display:flex}
-.modal{background:white;border-radius:15px;padding:25px;width:100%;max-width:510px;max-height:90vh;overflow:auto}
+.modal{background:var(--white);color:var(--text);border-radius:15px;padding:25px;width:100%;max-width:510px;max-height:90vh;overflow:auto;border:1px solid var(--border)}
 .modal h2{margin:0 0 5px;font-size:19px}
-.modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:20px}
-.toast{position:fixed;bottom:22px;right:22px;background:#14233b;color:white;padding:14px 18px;border-radius:9px;font-size:12px;display:none;z-index:10;box-shadow:0 8px 25px #0002}
+.modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:20px;flex-wrap:wrap}
+.toast{position:fixed;bottom:22px;right:22px;background:#14233b;color:white;padding:14px 18px;border-radius:9px;font-size:12px;display:none;z-index:10;box-shadow:0 8px 25px #0002;max-width:90vw}
 .loading{padding:60px;text-align:center;color:var(--muted)}
 .mobile-menu{display:none}
+.widget-option{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--border);font-size:13px;gap:12px}
+.widget-option:last-child{border-bottom:0}
+.widget-option input{width:18px;height:18px;accent-color:var(--blue)}
+.settings-section{margin-top:20px}
+.settings-section h3{font-size:13px;margin-bottom:8px}
+.widget-card{min-width:0}
+body.dark-theme{
+  --bg:#0b1220;--white:#172338;--navy:#101b30;
+  --text:#edf2ff;--muted:#9aa9c0;--border:#293851;
+  --soft:#223451;--table-head:#1d2b42;--result:#223451;
+}
+body.dark-theme .topbar{background:#172338}
+body.dark-theme .card,body.dark-theme .table-card,body.dark-theme .modal{background:#172338}
+body.dark-theme .secondary,body.dark-theme .small-btn{background:#172338;color:#edf2ff;border-color:#34445f}
+body.dark-theme .search,body.dark-theme .field input,body.dark-theme .field select{background:#101b30;color:#edf2ff;border-color:#34445f}
+body.dark-theme .notice{background:#223451;color:#c5d5ff}
+body.dark-theme .bar{background:#344a70}
+body.dark-theme .bar.highlight{background:#718cff}
+body.dark-theme .pill{background:#164c3d;color:#9be7c7}
+body.dark-theme .pill.low{background:#513b20;color:#ffd18b}
+body.dark-theme .pill.out{background:#512c35;color:#ffabb7}
+body.dark-theme .danger{background:#512c35;color:#ffabb7}
 @media(max-width:1000px){.stats{grid-template-columns:repeat(2,1fr)}.grid-main{grid-template-columns:1fr}.calc-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:700px){
  .sidebar{width:65px;padding:20px 8px}.logo{font-size:0;padding:10px 8px 30px}.logo:after{content:"O";font-size:23px;color:#78a0ff}
@@ -134,29 +157,38 @@ td{padding:14px 17px;border-top:1px solid var(--border);font-size:12px;white-spa
 
 <section class="page active" id="page-overview">
   <div class="page-head">
-    <div><h1>Dashboard</h1><div class="subtitle">Het actuele overzicht van jouw bedrijfsvoorraad.</div></div>
-    <button class="btn primary manager-only" onclick="openProduct()">+ Product toevoegen</button>
+    <div><h1>Dashboard</h1><div class="subtitle">Jouw persoonlijke bedrijfsdashboard.</div></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn secondary" onclick="openDashboardSettings()">⚙ Dashboard aanpassen</button>
+      <button class="btn primary manager-only" onclick="openProduct()">+ Product toevoegen</button>
+    </div>
   </div>
-  <div class="stats">
-    <div class="card"><div class="stat-top">Producten <span class="stat-icon">▤</span></div><div class="stat-value" id="statProducts">0</div><div class="stat-note">Verschillende producten</div></div>
-    <div class="card"><div class="stat-top">Voorraadwaarde <span class="stat-icon">€</span></div><div class="stat-value" id="statValue">€ 0</div><div class="stat-note">Op basis van inkoopprijs</div></div>
-    <div class="card"><div class="stat-top">Totale artikelen <span class="stat-icon">▦</span></div><div class="stat-value" id="statUnits">0</div><div class="stat-note">Stuks op voorraad</div></div>
-    <div class="card"><div class="stat-top">Lage voorraad <span class="stat-icon">⚠</span></div><div class="stat-value" id="statLow">0</div><div class="stat-note">Producten onder minimum</div></div>
+
+  <div class="stats" id="statsContainer">
+    <div class="card widget-card dashboard-widget-products"><div class="stat-top">Producten <span class="stat-icon">▤</span></div><div class="stat-value" id="statProducts">0</div><div class="stat-note">Verschillende producten</div></div>
+    <div class="card widget-card dashboard-widget-value"><div class="stat-top">Voorraadwaarde <span class="stat-icon">€</span></div><div class="stat-value" id="statValue">€ 0</div><div class="stat-note">Op basis van inkoopprijs</div></div>
+    <div class="card widget-card dashboard-widget-units"><div class="stat-top">Totale artikelen <span class="stat-icon">▦</span></div><div class="stat-value" id="statUnits">0</div><div class="stat-note">Stuks op voorraad</div></div>
+    <div class="card widget-card dashboard-widget-low"><div class="stat-top">Lage voorraad <span class="stat-icon">⚠</span></div><div class="stat-value" id="statLow">0</div><div class="stat-note">Producten onder minimum</div></div>
   </div>
+
   <div class="grid-main">
-    <div class="card">
+    <div class="card widget-card dashboard-widget-chart">
       <div class="card-title">Voorraad per product</div>
       <div class="card-sub">De 7 producten met de meeste voorraad</div>
       <div class="chart" id="stockChart"></div>
     </div>
-    <div class="card">
+    <div class="card widget-card dashboard-widget-alerts">
       <div class="card-title">Voorraadmeldingen</div>
       <div class="card-sub">Producten die aandacht nodig hebben</div>
       <div id="alerts" style="margin-top:13px"></div>
     </div>
   </div>
-  <div class="table-card">
-    <div class="table-head"><div><div class="card-title">Recent toegevoegde producten</div><div class="card-sub">De laatste producten in jouw voorraad</div></div><button class="btn secondary" onclick="showPage('inventory')">Alle producten bekijken →</button></div>
+
+  <div class="table-card widget-card dashboard-widget-recent">
+    <div class="table-head">
+      <div><div class="card-title">Recent toegevoegde producten</div><div class="card-sub">De laatste producten in jouw voorraad</div></div>
+      <button class="btn secondary" onclick="showPage('inventory')">Alle producten bekijken →</button>
+    </div>
     <div class="table-scroll"><table><thead><tr><th>PRODUCT</th><th>CATEGORIE</th><th>AANTAL</th><th>INKOOPPRIJS</th><th>STATUS</th></tr></thead><tbody id="recentTable"></tbody></table></div>
   </div>
 </section>
@@ -239,17 +271,70 @@ td{padding:14px 17px;border-top:1px solid var(--border);font-size:12px;white-spa
   <div class="modal-actions"><button class="btn secondary" onclick="closeProduct()">Annuleren</button><button class="btn primary" onclick="saveProduct()">Opslaan</button></div>
 </div>
 </div>
+
+<div class="modal-bg" id="dashboardSettings">
+<div class="modal">
+  <h2>Mijn dashboard aanpassen</h2>
+  <p class="card-sub">Kies welke onderdelen jij wilt zien.</p>
+
+  <div class="settings-section">
+    <h3>Dashboardonderdelen</h3>
+    <label class="widget-option"><span>Producten</span><input type="checkbox" data-widget="products"></label>
+    <label class="widget-option"><span>Voorraadwaarde</span><input type="checkbox" data-widget="value"></label>
+    <label class="widget-option"><span>Totale artikelen</span><input type="checkbox" data-widget="units"></label>
+    <label class="widget-option"><span>Lage voorraad</span><input type="checkbox" data-widget="low"></label>
+    <label class="widget-option"><span>Voorraadgrafiek</span><input type="checkbox" data-widget="chart"></label>
+    <label class="widget-option"><span>Voorraadmeldingen</span><input type="checkbox" data-widget="alerts"></label>
+    <label class="widget-option"><span>Recente producten</span><input type="checkbox" data-widget="recent"></label>
+  </div>
+
+  <div class="settings-section">
+    <h3>Weergave</h3>
+    <div class="field">
+      <label>Dashboardthema</label>
+      <select id="dashboardTheme">
+        <option value="light">Licht</option>
+        <option value="dark">Donker</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="modal-actions">
+    <button class="btn secondary" onclick="closeDashboardSettings()">Annuleren</button>
+    <button class="btn primary" id="saveSettingsButton" onclick="saveDashboardSettings()">Instellingen opslaan</button>
+  </div>
+</div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
+"use strict";
+
 const SUPABASE_URL = "https://vcgcowklqvfektlyzmia.supabase.co";
 const SUPABASE_KEY = "sb_publishable_6LEmGg5LMjgNoHHJDYmzfg_vzKf13Ry";
 
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 let currentUser = null;
 let companyId = null;
 let userRole = null;
 let products = [];
+
+const DEFAULT_PREFERENCES = {
+  theme: "light",
+  widgets: {
+    products:true,
+    value:true,
+    units:true,
+    low:true,
+    chart:true,
+    alerts:true,
+    recent:true
+  }
+};
+
+let dashboardPreferences = JSON.parse(JSON.stringify(DEFAULT_PREFERENCES));
 
 const money = n => new Intl.NumberFormat("nl-NL",{style:"currency",currency:"EUR"}).format(Number(n)||0);
 const number = n => new Intl.NumberFormat("nl-NL").format(Number(n)||0);
@@ -258,24 +343,148 @@ const canDelete = () => userRole === "owner";
 
 function toast(message){
   const el=document.getElementById("toast");
-  el.textContent=message;el.style.display="block";
-  setTimeout(()=>el.style.display="none",2800);
+  el.textContent=message;
+  el.style.display="block";
+  clearTimeout(window.toastTimer);
+  window.toastTimer=setTimeout(()=>el.style.display="none",3000);
 }
+
 function status(p){
   if(Number(p.quantity)<=0)return ["Uitverkocht","out"];
   if(Number(p.quantity)<=Number(p.minimum))return ["Lage voorraad","low"];
   return ["Op voorraad","ok"];
 }
+
 function showPage(name){
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-  document.getElementById("page-"+name).classList.add("active");
-  document.querySelectorAll(".nav[data-page]").forEach(n=>n.classList.toggle("active",n.dataset.page===name));
+  const page=document.getElementById("page-"+name);
+  if(page)page.classList.add("active");
+  document.querySelectorAll(".nav[data-page]").forEach(n=>{
+    n.classList.toggle("active",n.dataset.page===name);
+  });
 }
-document.querySelectorAll(".nav[data-page]").forEach(n=>n.addEventListener("click",()=>showPage(n.dataset.page)));
+
+document.querySelectorAll(".nav[data-page]").forEach(n=>{
+  n.addEventListener("click",()=>showPage(n.dataset.page));
+});
+
+function escapeHtml(value){
+  return String(value??"").replace(/[&<>"']/g,c=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[c]));
+}
+
+/* PERSOONLIJKE DASHBOARDINSTELLINGEN */
+
+async function loadDashboardSettings(){
+  const {data,error}=await db
+    .from("dashboard_preferences")
+    .select("preferences")
+    .eq("company_id",companyId)
+    .eq("user_id",currentUser.id)
+    .maybeSingle();
+
+  if(error)throw error;
+
+  if(data&&data.preferences){
+    const saved=data.preferences;
+    dashboardPreferences={
+      theme:saved.theme==="dark"?"dark":"light",
+      widgets:{
+        ...DEFAULT_PREFERENCES.widgets,
+        ...(saved.widgets||{})
+      }
+    };
+  }else{
+    dashboardPreferences=JSON.parse(JSON.stringify(DEFAULT_PREFERENCES));
+  }
+
+  applyDashboardSettings();
+}
+
+function applyDashboardSettings(){
+  Object.entries(dashboardPreferences.widgets).forEach(([name,visible])=>{
+    document.querySelectorAll(".dashboard-widget-"+name).forEach(el=>{
+      el.style.display=visible?"":"none";
+    });
+  });
+
+  document.body.classList.toggle(
+    "dark-theme",
+    dashboardPreferences.theme==="dark"
+  );
+}
+
+function openDashboardSettings(){
+  document.querySelectorAll("[data-widget]").forEach(input=>{
+    input.checked=dashboardPreferences.widgets[input.dataset.widget]!==false;
+  });
+
+  document.getElementById("dashboardTheme").value=dashboardPreferences.theme;
+  document.getElementById("dashboardSettings").classList.add("open");
+}
+
+function closeDashboardSettings(){
+  document.getElementById("dashboardSettings").classList.remove("open");
+}
+
+async function saveDashboardSettings(){
+  const button=document.getElementById("saveSettingsButton");
+  button.disabled=true;
+  button.textContent="Opslaan...";
+
+  try{
+    const widgets={};
+
+    document.querySelectorAll("[data-widget]").forEach(input=>{
+      widgets[input.dataset.widget]=input.checked;
+    });
+
+    const preferences={
+      theme:document.getElementById("dashboardTheme").value,
+      widgets
+    };
+
+    const {error}=await db
+      .from("dashboard_preferences")
+      .upsert({
+        company_id:companyId,
+        user_id:currentUser.id,
+        preferences,
+        updated_at:new Date().toISOString()
+      },{
+        onConflict:"company_id,user_id"
+      });
+
+    if(error)throw error;
+
+    dashboardPreferences=preferences;
+    applyDashboardSettings();
+    closeDashboardSettings();
+    toast("Jouw dashboardinstellingen zijn opgeslagen.");
+  }catch(error){
+    toast("Opslaan mislukt: "+error.message);
+  }finally{
+    button.disabled=false;
+    button.textContent="Instellingen opslaan";
+  }
+}
+
+/* ACCOUNT EN BEDRIJF */
 
 async function init(){
+  if(!window.supabase){
+    throw new Error("Supabase kon niet worden geladen. Controleer je internetverbinding.");
+  }
+
   const {data:{session},error}=await db.auth.getSession();
-  if(error||!session){location.href="/login.html";return;}
+  if(error)throw error;
+
+  if(!session){
+    location.href="/login.html";
+    return;
+  }
+
   currentUser=session.user;
 
   const {data:members,error:memberError}=await db
@@ -284,101 +493,155 @@ async function init(){
     .eq("user_id",currentUser.id);
 
   if(memberError)throw memberError;
+
   if(!members||members.length===0){
-    document.getElementById("loading").innerHTML="Geen bedrijfsaccount gekoppeld. Neem contact op met de beheerder.";
+    document.getElementById("loading").textContent=
+      "Geen bedrijfsaccount gekoppeld. Neem contact op met de beheerder.";
+    return;
+  }
+
+  if(members.length>1){
+    document.getElementById("loading").textContent=
+      "Dit account is aan meerdere bedrijven gekoppeld. De bedrijfskeuze moet eerst worden ingesteld.";
     return;
   }
 
   companyId=members[0].company_id;
   userRole=members[0].role;
 
-  document.getElementById("userName").textContent=currentUser.email.split("@")[0];
+  document.getElementById("userName").textContent=(currentUser.email||"Gebruiker").split("@")[0];
   document.getElementById("userRole").textContent=roleName(userRole);
-  document.getElementById("avatar").textContent=currentUser.email[0].toUpperCase();
-  document.getElementById("accountEmail").textContent=currentUser.email;
+  document.getElementById("avatar").textContent=(currentUser.email||"O")[0].toUpperCase();
+  document.getElementById("accountEmail").textContent=currentUser.email||"";
   document.getElementById("accountRole").textContent=roleName(userRole);
   document.getElementById("accountCompany").textContent=companyId;
-  document.getElementById("today").textContent=new Date().toLocaleDateString("nl-NL",{day:"numeric",month:"long",year:"numeric"});
+  document.getElementById("today").textContent=new Date().toLocaleDateString("nl-NL",{
+    day:"numeric",month:"long",year:"numeric"
+  });
 
   if(!canManage()){
     document.querySelectorAll(".manager-only").forEach(el=>el.style.display="none");
     document.getElementById("permissionNotice").style.display="block";
   }
 
+  await loadDashboardSettings();
   await loadProducts();
+
   document.getElementById("loading").style.display="none";
   document.getElementById("app").style.display="block";
-  calculate();calculatePrice();calculateStock();
+
+  calculate();
+  calculatePrice();
+  calculateStock();
 }
+
 function roleName(role){
   return ({owner:"Eigenaar",admin:"Beheerder",member:"Medewerker"})[role]||role;
 }
+
+/* PRODUCTEN */
+
 async function loadProducts(){
   const {data,error}=await db.from("company_data")
     .select("id,company_id,data")
     .eq("company_id",companyId);
+
   if(error)throw error;
+
   products=(data||[])
     .filter(row=>row.data&&row.data.type==="product")
     .map(row=>({...row.data,id:row.id}));
+
   renderAll();
 }
+
 function renderAll(){
   const totalUnits=products.reduce((s,p)=>s+Number(p.quantity||0),0);
   const totalValue=products.reduce((s,p)=>s+Number(p.quantity||0)*Number(p.cost_price||0),0);
   const low=products.filter(p=>status(p)[1]!=="ok").length;
+
   document.getElementById("statProducts").textContent=number(products.length);
   document.getElementById("statUnits").textContent=number(totalUnits);
   document.getElementById("statValue").textContent=money(totalValue);
   document.getElementById("statLow").textContent=number(low);
-  renderChart();renderAlerts();renderRecent();renderInventory();
+
+  renderChart();
+  renderAlerts();
+  renderRecent();
+  renderInventory();
 }
+
 function renderChart(){
-  const list=[...products].sort((a,b)=>b.quantity-a.quantity).slice(0,7);
+  const list=[...products].sort((a,b)=>Number(b.quantity)-Number(a.quantity)).slice(0,7);
   const max=Math.max(1,...list.map(p=>Number(p.quantity)||0));
+
   document.getElementById("stockChart").innerHTML=list.length?list.map((p,i)=>`
     <div class="bar-wrap" title="${escapeHtml(p.name)}: ${number(p.quantity)}">
-      <div class="bar ${i===0?"highlight":""}" style="height:${Math.max(3,(p.quantity/max)*100)}%"></div>
+      <div class="bar ${i===0?"highlight":""}" style="height:${Math.max(3,(Number(p.quantity||0)/max)*100)}%"></div>
       <div class="bar-label">${escapeHtml((p.name||"").slice(0,9))}</div>
     </div>`).join(""):'<div class="empty">Nog geen voorraadgegevens</div>';
 }
+
 function renderAlerts(){
   const list=products.filter(p=>status(p)[1]!=="ok").slice(0,6);
+
   document.getElementById("alerts").innerHTML=list.length?list.map(p=>`
-    <div class="alert-row"><span>${escapeHtml(p.name)}</span><span class="pill ${status(p)[1]}">${number(p.quantity)} stuks</span></div>`).join(""):'<div class="empty">Geen voorraadmeldingen. Alles ziet er goed uit.</div>';
+    <div class="alert-row">
+      <span>${escapeHtml(p.name)}</span>
+      <span class="pill ${status(p)[1]}">${number(p.quantity)} stuks</span>
+    </div>`).join(""):'<div class="empty">Geen voorraadmeldingen. Alles ziet er goed uit.</div>';
 }
+
 function renderRecent(){
   const list=[...products].slice(-5).reverse();
+
   document.getElementById("recentTable").innerHTML=list.length?list.map(p=>`
-    <tr><td><span class="product-name">${escapeHtml(p.name)}</span><div class="product-sku">${escapeHtml(p.sku||"Geen artikelnummer")}</div></td>
-    <td>${escapeHtml(p.category||"-")}</td><td>${number(p.quantity)}</td><td>${money(p.cost_price)}</td>
-    <td><span class="pill ${status(p)[1]}">${status(p)[0]}</span></td></tr>`).join(""):'<tr><td colspan="5" class="empty">Nog geen producten toegevoegd</td></tr>';
+    <tr>
+      <td><span class="product-name">${escapeHtml(p.name)}</span><div class="product-sku">${escapeHtml(p.sku||"Geen artikelnummer")}</div></td>
+      <td>${escapeHtml(p.category||"-")}</td>
+      <td>${number(p.quantity)}</td>
+      <td>${money(p.cost_price)}</td>
+      <td><span class="pill ${status(p)[1]}">${status(p)[0]}</span></td>
+    </tr>`).join(""):'<tr><td colspan="5" class="empty">Nog geen producten toegevoegd</td></tr>';
 }
+
 function renderInventory(){
-  const q=(document.getElementById("search")?.value||"").toLowerCase();
-  const f=document.getElementById("filter")?.value||"all";
+  const search=document.getElementById("search");
+  const filter=document.getElementById("filter");
+  if(!search||!filter)return;
+
+  const q=search.value.toLowerCase();
+  const f=filter.value;
+
   const list=products.filter(p=>{
     const matches=(p.name+" "+(p.sku||"")+" "+(p.category||"")).toLowerCase().includes(q);
     const s=status(p)[1];
-    return matches&&(f==="all"||f===s||(f==="low"&&s==="low"));
+    return matches&&(f==="all"||f===s);
   });
+
   document.getElementById("productCount").textContent=list.length+" producten";
   document.getElementById("emptyInventory").style.display=list.length?"none":"block";
+
   document.getElementById("inventoryTable").innerHTML=list.map(p=>`
     <tr>
       <td><span class="product-name">${escapeHtml(p.name)}</span><div class="product-sku">${escapeHtml(p.sku||"-")}</div></td>
-      <td>${escapeHtml(p.category||"-")}</td><td>${number(p.quantity)}</td>
-      <td>${number(p.minimum)}</td><td>${money(p.cost_price)}</td><td>${money(p.sell_price)}</td>
+      <td>${escapeHtml(p.category||"-")}</td>
+      <td>${number(p.quantity)}</td>
+      <td>${number(p.minimum)}</td>
+      <td>${money(p.cost_price)}</td>
+      <td>${money(p.sell_price)}</td>
       <td>${money(Number(p.quantity)*Number(p.cost_price))}</td>
       <td><span class="pill ${status(p)[1]}">${status(p)[0]}</span></td>
-      <td><div class="actions">${canManage()?`<button class="small-btn" onclick="editProduct('${p.id}')">Wijzig</button>`:""}${canDelete()?`<button class="small-btn" onclick="deleteProduct('${p.id}')">Verwijder</button>`:""}</div></td>
+      <td><div class="actions">
+        ${canManage()?`<button class="small-btn" onclick="editProduct('${p.id}')">Wijzig</button>`:""}
+        ${canDelete()?`<button class="small-btn" onclick="deleteProduct('${p.id}')">Verwijder</button>`:""}
+      </div></td>
     </tr>`).join("");
 }
-function escapeHtml(value){
-  return String(value??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-}
+
 function openProduct(p=null){
   if(!canManage())return;
+
   document.getElementById("modalTitle").textContent=p?"Product wijzigen":"Product toevoegen";
   document.getElementById("editId").value=p?.id||"";
   document.getElementById("pName").value=p?.name||"";
@@ -390,75 +653,145 @@ function openProduct(p=null){
   document.getElementById("pSell").value=p?.sell_price??0;
   document.getElementById("productModal").classList.add("open");
 }
-function closeProduct(){document.getElementById("productModal").classList.remove("open")}
-function editProduct(id){const p=products.find(x=>x.id===id);if(p)openProduct(p)}
+
+function closeProduct(){
+  document.getElementById("productModal").classList.remove("open");
+}
+
+function editProduct(id){
+  const p=products.find(x=>x.id===id);
+  if(p)openProduct(p);
+}
+
 async function saveProduct(){
   if(!canManage())return;
+
   const name=document.getElementById("pName").value.trim();
   if(!name){toast("Vul een productnaam in.");return;}
+
+  const quantity=Number(document.getElementById("pQuantity").value);
+  const minimum=Number(document.getElementById("pMinimum").value);
+  const cost=Number(document.getElementById("pCost").value);
+  const sell=Number(document.getElementById("pSell").value);
+
+  if([quantity,minimum,cost,sell].some(v=>!Number.isFinite(v)||v<0)){
+    toast("Vul geldige positieve getallen in.");
+    return;
+  }
+
   const values={
-    type:"product",name,
+    type:"product",
+    name,
     sku:document.getElementById("pSku").value.trim(),
     category:document.getElementById("pCategory").value.trim(),
-    quantity:Math.max(0,Number(document.getElementById("pQuantity").value)||0),
-    minimum:Math.max(0,Number(document.getElementById("pMinimum").value)||0),
-    cost_price:Math.max(0,Number(document.getElementById("pCost").value)||0),
-    sell_price:Math.max(0,Number(document.getElementById("pSell").value)||0),
+    quantity,
+    minimum,
+    cost_price:cost,
+    sell_price:sell,
     updated_at:new Date().toISOString()
   };
+
   const id=document.getElementById("editId").value;
   let result;
+
   if(id){
-    result=await db.from("company_data").update({data:values}).eq("id",id).eq("company_id",companyId);
+    result=await db.from("company_data")
+      .update({data:values})
+      .eq("id",id)
+      .eq("company_id",companyId);
   }else{
-    result=await db.from("company_data").insert({company_id:companyId,data:values});
+    result=await db.from("company_data")
+      .insert({company_id:companyId,data:values});
   }
+
   if(result.error){toast("Opslaan mislukt: "+result.error.message);return;}
-  closeProduct();await loadProducts();toast("Product opgeslagen.");
+
+  closeProduct();
+  await loadProducts();
+  toast("Product opgeslagen.");
 }
+
 async function deleteProduct(id){
   if(!canDelete()){toast("Alleen de eigenaar kan producten verwijderen.");return;}
   if(!confirm("Weet je zeker dat je dit product wilt verwijderen?"))return;
-  const {error}=await db.from("company_data").delete().eq("id",id).eq("company_id",companyId);
+
+  const {error}=await db.from("company_data")
+    .delete()
+    .eq("id",id)
+    .eq("company_id",companyId);
+
   if(error){toast("Verwijderen mislukt: "+error.message);return;}
-  await loadProducts();toast("Product verwijderd.");
+
+  await loadProducts();
+  toast("Product verwijderd.");
 }
+
+/* EXPORT */
+
 function exportCSV(){
   const rows=[["Product","Artikelnummer","Categorie","Aantal","Minimum","Inkoopprijs","Verkoopprijs","Voorraadwaarde"]];
-  products.forEach(p=>rows.push([p.name,p.sku,p.category,p.quantity,p.minimum,p.cost_price,p.sell_price,(p.quantity*p.cost_price).toFixed(2)]));
+
+  products.forEach(p=>rows.push([
+    p.name,p.sku,p.category,p.quantity,p.minimum,p.cost_price,p.sell_price,
+    (Number(p.quantity)*Number(p.cost_price)).toFixed(2)
+  ]));
+
   const csv=rows.map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(";")).join("\n");
   const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});
-  const url=URL.createObjectURL(blob);const a=document.createElement("a");
-  a.href=url;a.download="optivio-voorraad.csv";a.click();URL.revokeObjectURL(url);
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download="optivio-voorraad.csv";
+  a.click();
+  URL.revokeObjectURL(url);
   toast("CSV-bestand gedownload.");
 }
+
+/* REKENTOOLS */
+
 function calculate(){
   const c=Number(document.getElementById("calcCost").value)||0;
   const s=Number(document.getElementById("calcSell").value)||0;
   const profit=s-c;
+
   document.getElementById("calcProfit").textContent=money(profit);
-  document.getElementById("calcMargin").textContent=(s>0?(profit/s*100):0).toFixed(1).replace(".",",")+"%";
-  document.getElementById("calcMarkup").textContent=(c>0?(profit/c*100):0).toFixed(1).replace(".",",")+"%";
+  document.getElementById("calcMargin").textContent=(s>0?profit/s*100:0).toFixed(1).replace(".",",")+"%";
+  document.getElementById("calcMarkup").textContent=(c>0?profit/c*100:0).toFixed(1).replace(".",",")+"%";
 }
+
 function calculatePrice(){
   const c=Number(document.getElementById("priceCost").value)||0;
   const m=Number(document.getElementById("priceMargin").value)||0;
-  document.getElementById("targetPrice").textContent=m>=100?"Ongeldige marge":money(c/(1-m/100));
+
+  document.getElementById("targetPrice").textContent=
+    m>=100||m<0?"Ongeldige marge":money(c/(1-m/100));
 }
+
 function calculateStock(){
   const q=Number(document.getElementById("stockAmount").value)||0;
   const p=Number(document.getElementById("stockPrice").value)||0;
   document.getElementById("stockTotal").textContent=money(q*p);
 }
+
+/* UITLOGGEN EN SESSIE */
+
 document.getElementById("logout").addEventListener("click",async()=>{
-  await db.auth.signOut();location.href="/login.html";
+  await db.auth.signOut();
+  location.href="/login.html";
 });
-db.auth.onAuthStateChange((event,session)=>{
-  if(event==="SIGNED_OUT")location.href="/login.html";
+
+db.auth.onAuthStateChange((event)=>{
+  if(event==="SIGNED_OUT"){
+    location.href="/login.html";
+  }
 });
+
+/* START */
+
 init().catch(error=>{
   console.error(error);
-  document.getElementById("loading").textContent="Er is een probleem opgetreden: "+error.message;
+  document.getElementById("loading").textContent=
+    "Er is een probleem opgetreden: "+error.message;
 });
 </script>
 </body>
