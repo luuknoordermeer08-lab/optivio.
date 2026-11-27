@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="nl">
 <head>
@@ -6,169 +5,684 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Optivio | Bedrijfsbeheer</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 :root{
-  --bg:#f4f6fa;--white:#fff;--navy:#14233b;--blue:#3867ed;
-  --text:#19243a;--muted:#8290a5;--border:#e8edf4;
-  --green:#15966b;--red:#df5353;--orange:#e49a32;
-  --soft:#edf2ff;--table-head:#fafbfd;--result:#f0f4ff;
+  --bg:#f5f7fb;
+  --surface:#ffffff;
+  --sidebar:#111c2e;
+  --sidebar-hover:#1e304b;
+  --primary:#3157d5;
+  --primary-hover:#2646b5;
+  --primary-soft:#edf1ff;
+  --text:#172338;
+  --muted:#7d899d;
+  --border:#e7ebf2;
+  --green:#16865f;
+  --green-soft:#e9f7f0;
+  --red:#c94c58;
+  --red-soft:#fff0f1;
+  --orange:#b87923;
+  --orange-soft:#fff5e7;
+  --shadow:0 4px 18px rgba(20,35,60,.045);
+  --radius:13px;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);font-family:Inter,Arial,sans-serif;color:var(--text);transition:background .2s,color .2s}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+  font-size:14px;
+}
 button,input,select{font:inherit}
 button{cursor:pointer}
 .layout{display:flex;min-height:100vh}
-.sidebar{width:250px;background:var(--navy);color:white;padding:27px 17px;display:flex;flex-direction:column;flex-shrink:0}
-.logo{font-size:24px;font-weight:800;letter-spacing:2px;padding:5px 12px 35px}
-.logo span{color:#78a0ff}
-.nav-label{font-size:10px;color:#8391a9;letter-spacing:1.5px;margin:18px 12px 10px}
-.nav{display:flex;align-items:center;gap:12px;padding:13px 14px;border-radius:9px;color:#b8c4d7;text-decoration:none;font-size:13px;margin:3px 0;cursor:pointer}
-.nav:hover,.nav.active{background:#263b5c;color:white}
-.nav.active{box-shadow:inset 3px 0 #6c94ff}
-.sidebar-bottom{margin-top:auto;border-top:1px solid #31415a;padding-top:18px}
-.user-mini{display:flex;align-items:center;gap:10px;padding:10px}
-.avatar{width:36px;height:36px;border-radius:11px;background:#38558a;display:grid;place-items:center;font-weight:700}
-.user-mini small{display:block;color:#aab8ce;margin-top:4px;font-size:11px}
+
+/* SIDEBAR */
+.sidebar{
+  width:250px;
+  background:var(--sidebar);
+  color:#fff;
+  padding:25px 16px 18px;
+  display:flex;
+  flex-direction:column;
+  flex-shrink:0;
+}
+.logo{
+  font-size:24px;
+  font-weight:800;
+  letter-spacing:2px;
+  padding:5px 13px 38px;
+}
+.logo span{color:#8ba5ff}
+.nav-label{
+  color:#75849b;
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:1.5px;
+  margin:18px 13px 10px;
+}
+.nav{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:13px 14px;
+  border-radius:9px;
+  color:#b7c3d5;
+  text-decoration:none;
+  font-size:13px;
+  margin:3px 0;
+  cursor:pointer;
+  transition:.15s;
+}
+.nav:hover,.nav.active{
+  background:var(--sidebar-hover);
+  color:#fff;
+}
+.nav.active{
+  box-shadow:inset 3px 0 #829dff;
+}
+.sidebar-bottom{
+  margin-top:auto;
+  border-top:1px solid #29384d;
+  padding-top:17px;
+}
+.user-mini{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px;
+  min-width:0;
+}
+.user-mini strong{
+  display:block;
+  font-size:12px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:145px;
+}
+.user-mini small{
+  display:block;
+  color:#9eacc0;
+  margin-top:4px;
+  font-size:11px;
+}
+.avatar{
+  width:37px;
+  height:37px;
+  border-radius:11px;
+  background:#304b78;
+  display:grid;
+  place-items:center;
+  font-weight:750;
+  flex-shrink:0;
+}
+.logout-link{color:#b7c3d5}
+
+/* MAIN */
 .main{flex:1;min-width:0}
-.topbar{height:72px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 35px}
-.topbar small{color:var(--muted)}
-.top-right{display:flex;align-items:center;gap:14px;font-size:12px}
-.status-dot{width:8px;height:8px;background:#23b77d;border-radius:50%;display:inline-block;margin-right:6px}
-.content{padding:32px 36px;max-width:1500px;margin:auto}
-.page-head{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:25px}
-h1{font-size:25px;margin:0 0 7px;letter-spacing:-.6px}
-.subtitle{font-size:13px;color:var(--muted)}
-.btn{border:0;border-radius:8px;padding:11px 16px;font-size:12px;font-weight:650}
-.primary{background:var(--blue);color:white}
-.primary:hover{background:#2853d2}
-.secondary{background:var(--white);border:1px solid var(--border);color:var(--text)}
-.danger{background:#fff0f0;color:var(--red)}
-.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:20px}
-.card{background:var(--white);border:1px solid var(--border);border-radius:13px;padding:20px;min-width:0}
-.stat-top{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:12px}
-.stat-icon{width:36px;height:36px;border-radius:10px;background:var(--soft);display:grid;place-items:center;font-size:17px}
-.stat-value{font-size:26px;font-weight:750;margin:15px 0 6px;letter-spacing:-.8px}
+.topbar{
+  height:70px;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 34px;
+}
+.topbar-brand{
+  font-size:14px;
+  font-weight:750;
+}
+.topbar-brand span{
+  color:var(--muted);
+  font-weight:400;
+  margin-left:7px;
+}
+.top-right{
+  display:flex;
+  align-items:center;
+  gap:18px;
+  color:var(--muted);
+  font-size:12px;
+}
+.connection{
+  display:flex;
+  align-items:center;
+  gap:7px;
+}
+.status-dot{
+  width:7px;
+  height:7px;
+  background:#20a575;
+  border-radius:50%;
+}
+.content{
+  padding:32px 36px;
+  max-width:1550px;
+  margin:auto;
+}
+.page{display:none}
+.page.active{display:block}
+.page-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  margin-bottom:25px;
+}
+h1{
+  font-size:25px;
+  margin:0 0 7px;
+  letter-spacing:-.7px;
+  font-weight:750;
+}
+.subtitle{
+  font-size:13px;
+  color:var(--muted);
+}
+.btn{
+  border:0;
+  border-radius:8px;
+  padding:11px 16px;
+  font-size:12px;
+  font-weight:650;
+  transition:.15s;
+}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.primary{
+  background:var(--primary);
+  color:white;
+}
+.primary:hover{background:var(--primary-hover)}
+.secondary{
+  background:var(--surface);
+  border:1px solid var(--border);
+  color:var(--text);
+}
+.secondary:hover{background:#f7f8fb}
+.danger{
+  background:var(--red-soft);
+  color:var(--red);
+}
+
+/* CARDS */
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:16px;
+  margin-bottom:19px;
+}
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:20px;
+  min-width:0;
+  box-shadow:var(--shadow);
+}
+.stat-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:550;
+}
+.stat-icon{
+  width:36px;
+  height:36px;
+  border-radius:10px;
+  background:var(--primary-soft);
+  color:var(--primary);
+  display:grid;
+  place-items:center;
+  font-size:16px;
+  font-weight:700;
+}
+.stat-value{
+  font-size:27px;
+  font-weight:760;
+  margin:16px 0 5px;
+  letter-spacing:-.8px;
+}
 .stat-note{font-size:11px;color:var(--muted)}
-.green{color:var(--green)}.red{color:var(--red)}.orange{color:var(--orange)}
-.grid-main{display:grid;grid-template-columns:1.5fr 1fr;gap:18px;margin-bottom:20px}
-.card-title{font-size:14px;font-weight:700;margin-bottom:5px}
-.card-sub{font-size:11px;color:var(--muted)}
-.chart{height:190px;display:flex;align-items:end;gap:12px;padding:20px 5px 0}
-.bar-wrap{height:100%;flex:1;display:flex;flex-direction:column;justify-content:end;align-items:center;gap:8px;min-width:0}
-.bar{width:100%;max-width:42px;background:#dce6ff;border-radius:6px 6px 2px 2px;min-height:4px}
-.bar.highlight{background:var(--blue)}
-.bar-label{font-size:10px;color:var(--muted);overflow:hidden;max-width:100%;white-space:nowrap}
-.alert-row{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid var(--border);font-size:12px;gap:10px}
+.grid-main{
+  display:grid;
+  grid-template-columns:1.5fr 1fr;
+  gap:18px;
+  margin-bottom:19px;
+}
+.card-title{
+  font-size:14px;
+  font-weight:730;
+  margin-bottom:5px;
+}
+.card-sub{
+  font-size:11px;
+  color:var(--muted);
+  line-height:1.6;
+}
+.chart{
+  height:190px;
+  display:flex;
+  align-items:end;
+  gap:12px;
+  padding:20px 5px 0;
+}
+.bar-wrap{
+  height:100%;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  justify-content:end;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+.bar{
+  width:100%;
+  max-width:42px;
+  background:#dce4f7;
+  border-radius:6px 6px 2px 2px;
+  min-height:4px;
+}
+.bar.highlight{background:var(--primary)}
+.bar-label{
+  font-size:10px;
+  color:var(--muted);
+  overflow:hidden;
+  max-width:100%;
+  white-space:nowrap;
+}
+.alert-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:13px 0;
+  border-bottom:1px solid var(--border);
+  font-size:12px;
+  gap:10px;
+}
 .alert-row:last-child{border:0}
-.pill{padding:5px 8px;border-radius:20px;font-size:10px;font-weight:700;background:#e9f8f1;color:var(--green)}
-.pill.low{background:#fff4e5;color:#b87513}
-.pill.out{background:#ffeded;color:var(--red)}
-.table-card{background:var(--white);border:1px solid var(--border);border-radius:13px;overflow:hidden}
-.table-head{padding:19px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.pill{
+  display:inline-flex;
+  align-items:center;
+  padding:5px 9px;
+  border-radius:20px;
+  font-size:10px;
+  font-weight:700;
+  background:var(--green-soft);
+  color:var(--green);
+}
+.pill.low{background:var(--orange-soft);color:var(--orange)}
+.pill.out{background:var(--red-soft);color:var(--red)}
+
+/* TABLES */
+.table-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  overflow:hidden;
+  box-shadow:var(--shadow);
+}
+.table-head{
+  padding:19px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
 .tools{display:flex;gap:9px;flex-wrap:wrap}
-.search{border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:12px;min-width:210px;outline:none;background:var(--white);color:var(--text)}
-.search:focus,input:focus,select:focus{border-color:var(--blue)}
+.search{
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:10px 12px;
+  font-size:12px;
+  min-width:210px;
+  outline:none;
+  background:var(--surface);
+  color:var(--text);
+}
+.search:focus,.field input:focus,.field select:focus{
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px rgba(49,87,213,.09);
+}
 table{width:100%;border-collapse:collapse;text-align:left}
-th{font-size:10px;color:var(--muted);font-weight:650;background:var(--table-head);padding:13px 17px;white-space:nowrap}
-td{padding:14px 17px;border-top:1px solid var(--border);font-size:12px;white-space:nowrap}
-.product-name{font-weight:700}.product-sku{font-size:10px;color:var(--muted);margin-top:4px}
+th{
+  font-size:10px;
+  color:var(--muted);
+  font-weight:700;
+  background:#f9fafc;
+  padding:13px 17px;
+  white-space:nowrap;
+}
+td{
+  padding:14px 17px;
+  border-top:1px solid var(--border);
+  font-size:12px;
+  white-space:nowrap;
+}
+.product-name{font-weight:700}
+.product-sku{font-size:10px;color:var(--muted);margin-top:4px}
 .table-scroll{overflow-x:auto}
 .actions{display:flex;gap:6px}
-.small-btn{border:1px solid var(--border);background:var(--white);color:var(--text);border-radius:6px;padding:6px 9px;font-size:11px}
-.empty{text-align:center;padding:45px 15px;color:var(--muted);font-size:13px}
-.page{display:none}.page.active{display:block}
-.calc-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.small-btn{
+  border:1px solid var(--border);
+  background:var(--surface);
+  color:var(--text);
+  border-radius:6px;
+  padding:6px 9px;
+  font-size:11px;
+}
+.small-btn:hover{background:#f5f7fb}
+.empty{
+  text-align:center;
+  padding:42px 15px;
+  color:var(--muted);
+  font-size:13px;
+}
+
+/* CALCULATORS */
+.calc-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:16px;
+}
 .field{margin:15px 0}
-.field label{display:block;font-size:11px;color:var(--muted);margin-bottom:7px}
-.field input,.field select{width:100%;padding:11px;border:1px solid var(--border);border-radius:8px;outline:none;font-size:13px;background:var(--white);color:var(--text)}
-.result{background:var(--result);border-radius:9px;padding:15px;margin-top:15px}
+.field label{
+  display:block;
+  font-size:11px;
+  font-weight:600;
+  color:var(--muted);
+  margin-bottom:7px;
+}
+.field input,.field select{
+  width:100%;
+  padding:11px 12px;
+  border:1px solid var(--border);
+  border-radius:8px;
+  outline:none;
+  font-size:13px;
+  background:var(--surface);
+  color:var(--text);
+}
+.result{
+  background:var(--primary-soft);
+  border-radius:9px;
+  padding:14px 15px;
+  margin-top:12px;
+}
 .result small{color:var(--muted);font-size:11px}
-.result strong{display:block;font-size:23px;margin-top:5px;color:var(--blue)}
-.notice{padding:14px 16px;border-radius:9px;background:#edf3ff;color:#3557a0;font-size:12px;margin-bottom:18px}
-.modal-bg{display:none;position:fixed;inset:0;background:#101b2b88;z-index:5;align-items:center;justify-content:center;padding:15px}
+.result strong{
+  display:block;
+  font-size:22px;
+  margin-top:5px;
+  color:var(--primary);
+}
+.notice{
+  padding:14px 16px;
+  border-radius:9px;
+  background:var(--primary-soft);
+  color:#3552a1;
+  font-size:12px;
+  margin-bottom:18px;
+}
+
+/* ACCOUNT */
+.account-grid{
+  display:grid;
+  grid-template-columns:minmax(0,650px);
+  gap:18px;
+}
+.account-card{max-width:700px}
+.account-description{
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.8;
+  margin-top:17px;
+}
+.integration-header{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:12px;
+}
+.integration-icon{
+  width:42px;
+  height:42px;
+  border-radius:11px;
+  background:#f0f3fa;
+  display:grid;
+  place-items:center;
+  font-size:20px;
+}
+.integration-status{
+  font-size:12px;
+  color:var(--muted);
+  line-height:1.7;
+  margin:10px 0 16px;
+}
+
+/* MODALS */
+.modal-bg{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(12,22,39,.58);
+  backdrop-filter:blur(3px);
+  z-index:5;
+  align-items:center;
+  justify-content:center;
+  padding:15px;
+}
 .modal-bg.open{display:flex}
-.modal{background:var(--white);color:var(--text);border-radius:15px;padding:25px;width:100%;max-width:510px;max-height:90vh;overflow:auto;border:1px solid var(--border)}
+.modal{
+  background:var(--surface);
+  color:var(--text);
+  border-radius:15px;
+  padding:25px;
+  width:100%;
+  max-width:510px;
+  max-height:90vh;
+  overflow:auto;
+  border:1px solid var(--border);
+  box-shadow:0 20px 70px rgba(0,0,0,.18);
+}
 .modal h2{margin:0 0 5px;font-size:19px}
-.modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:20px;flex-wrap:wrap}
-.toast{position:fixed;bottom:22px;right:22px;background:#14233b;color:white;padding:14px 18px;border-radius:9px;font-size:12px;display:none;z-index:10;box-shadow:0 8px 25px #0002;max-width:90vw}
-.loading{padding:60px;text-align:center;color:var(--muted)}
-.mobile-menu{display:none}
-.widget-option{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--border);font-size:13px;gap:12px}
-.widget-option:last-child{border-bottom:0}
-.widget-option input{width:18px;height:18px;accent-color:var(--blue)}
+.modal-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:9px;
+  margin-top:20px;
+  flex-wrap:wrap;
+}
 .settings-section{margin-top:20px}
 .settings-section h3{font-size:13px;margin-bottom:8px}
-.widget-card{min-width:0}
-body.dark-theme{
-  --bg:#0b1220;--white:#172338;--navy:#101b30;
-  --text:#edf2ff;--muted:#9aa9c0;--border:#293851;
-  --soft:#223451;--table-head:#1d2b42;--result:#223451;
+.widget-option{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:13px 0;
+  border-bottom:1px solid var(--border);
+  font-size:13px;
+  gap:12px;
 }
-body.dark-theme .topbar{background:#172338}
-body.dark-theme .card,body.dark-theme .table-card,body.dark-theme .modal{background:#172338}
-body.dark-theme .secondary,body.dark-theme .small-btn{background:#172338;color:#edf2ff;border-color:#34445f}
-body.dark-theme .search,body.dark-theme .field input,body.dark-theme .field select{background:#101b30;color:#edf2ff;border-color:#34445f}
+.widget-option:last-child{border-bottom:0}
+.widget-option input{
+  width:18px;
+  height:18px;
+  accent-color:var(--primary);
+}
+.toast{
+  position:fixed;
+  bottom:22px;
+  right:22px;
+  background:#172338;
+  color:white;
+  padding:14px 18px;
+  border-radius:9px;
+  font-size:12px;
+  display:none;
+  z-index:10;
+  box-shadow:0 8px 25px #0002;
+  max-width:90vw;
+}
+.loading{
+  padding:60px;
+  text-align:center;
+  color:var(--muted);
+}
+.mobile-menu{display:none}
+
+/* DARK THEME */
+body.dark-theme{
+  --bg:#0c1422;
+  --surface:#172338;
+  --sidebar:#0a1220;
+  --text:#edf2fa;
+  --muted:#9baac0;
+  --border:#29384f;
+  --primary-soft:#223451;
+  --green-soft:#173e35;
+  --red-soft:#462b35;
+  --orange-soft:#49391f;
+  --shadow:0 4px 18px rgba(0,0,0,.12);
+}
+body.dark-theme .topbar,
+body.dark-theme .card,
+body.dark-theme .table-card,
+body.dark-theme .modal{background:var(--surface)}
+body.dark-theme th{background:#1d2b40}
+body.dark-theme .secondary,
+body.dark-theme .small-btn{
+  background:var(--surface);
+  color:var(--text);
+  border-color:var(--border);
+}
+body.dark-theme .search,
+body.dark-theme .field input,
+body.dark-theme .field select{
+  background:#101b2c;
+  color:var(--text);
+  border-color:var(--border);
+}
 body.dark-theme .notice{background:#223451;color:#c5d5ff}
 body.dark-theme .bar{background:#344a70}
-body.dark-theme .bar.highlight{background:#718cff}
-body.dark-theme .pill{background:#164c3d;color:#9be7c7}
-body.dark-theme .pill.low{background:#513b20;color:#ffd18b}
-body.dark-theme .pill.out{background:#512c35;color:#ffabb7}
-body.dark-theme .danger{background:#512c35;color:#ffabb7}
-@media(max-width:1000px){.stats{grid-template-columns:repeat(2,1fr)}.grid-main{grid-template-columns:1fr}.calc-grid{grid-template-columns:1fr 1fr}}
+body.dark-theme .bar.highlight{background:#829aff}
+body.dark-theme .integration-icon{background:#26364d}
+
+/* RESPONSIVE */
+@media(max-width:1100px){
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .grid-main{grid-template-columns:1fr}
+  .calc-grid{grid-template-columns:1fr 1fr}
+}
 @media(max-width:700px){
- .sidebar{width:65px;padding:20px 8px}.logo{font-size:0;padding:10px 8px 30px}.logo:after{content:"O";font-size:23px;color:#78a0ff}
- .nav{justify-content:center;padding:13px 5px;font-size:0}.nav-label{font-size:0;margin:10px}
- .sidebar-bottom .user-mini{justify-content:center;padding:5px}.sidebar-bottom .user-mini div:last-child{display:none}
- .topbar{padding:0 16px;height:60px}.content{padding:22px 14px}.page-head{align-items:flex-start;flex-direction:column}
- .stats{gap:9px}.card{padding:15px}.stat-value{font-size:22px}.calc-grid{grid-template-columns:1fr}
- .search{min-width:150px;width:100%}.table-head{align-items:stretch}.tools{width:100%}
+  .sidebar{width:65px;padding:20px 8px}
+  .logo{font-size:0;padding:10px 8px 30px}
+  .logo:after{content:"O";font-size:23px;color:#8ba5ff}
+  .nav{justify-content:center;padding:13px 5px;font-size:0}
+  .nav-label{font-size:0;margin:10px}
+  .sidebar-bottom .user-mini{justify-content:center;padding:5px}
+  .sidebar-bottom .user-mini div:last-child{display:none}
+  .topbar{padding:0 15px;height:60px}
+  .top-right{gap:9px;font-size:10px}
+  .content{padding:22px 14px}
+  .page-head{align-items:flex-start;flex-direction:column}
+  .stats{gap:9px}
+  .card{padding:15px}
+  .stat-value{font-size:22px}
+  .calc-grid{grid-template-columns:1fr}
+  .search{min-width:140px;width:100%}
+  .table-head{align-items:stretch}
+  .tools{width:100%}
+  .tools select{width:100%}
+  .tools button{width:100%}
+  .chart{gap:7px}
 }
 </style>
 </head>
+
 <body>
 <div class="layout">
+
 <aside class="sidebar">
   <div class="logo">OPTI<span>VIO</span></div>
+
   <div class="nav-label">WERKOMGEVING</div>
   <a class="nav active" data-page="overview">▦ &nbsp; Dashboard</a>
   <a class="nav" data-page="inventory">▤ &nbsp; Voorraadbeheer</a>
   <a class="nav" data-page="calculators">∑ &nbsp; Rekentools</a>
+
   <div class="nav-label">ACCOUNT</div>
   <a class="nav" data-page="account">◉ &nbsp; Account en rechten</a>
+
   <div class="sidebar-bottom">
     <div class="user-mini">
       <div class="avatar" id="avatar">O</div>
-      <div><strong id="userName">Gebruiker</strong><small id="userRole">Laden...</small></div>
+      <div>
+        <strong id="userName">Gebruiker</strong>
+        <small id="userRole">Laden...</small>
+      </div>
     </div>
-    <a class="nav" id="logout">↪ &nbsp; Uitloggen</a>
+    <a class="nav logout-link" id="logout">↪ &nbsp; Uitloggen</a>
   </div>
 </aside>
 
 <main class="main">
 <header class="topbar">
-  <div><strong>Optivio</strong> <small> / Bedrijfsomgeving</small></div>
-  <div class="top-right"><span><i class="status-dot"></i>Verbonden</span><span id="today"></span></div>
+  <div class="topbar-brand">Optivio <span>/ Bedrijfsomgeving</span></div>
+  <div class="top-right">
+    <span class="connection"><i class="status-dot"></i> Verbonden</span>
+    <span id="today"></span>
+  </div>
 </header>
 
 <div class="content">
 <div id="loading" class="loading">Je bedrijfsomgeving wordt geladen...</div>
+
 <div id="app" style="display:none">
 
+<!-- DASHBOARD -->
 <section class="page active" id="page-overview">
   <div class="page-head">
-    <div><h1>Dashboard</h1><div class="subtitle">Jouw persoonlijke bedrijfsdashboard.</div></div>
+    <div>
+      <h1>Dashboard</h1>
+      <div class="subtitle">Een duidelijk overzicht van jouw bedrijfsgegevens.</div>
+    </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn secondary" onclick="openDashboardSettings()">⚙ Dashboard aanpassen</button>
       <button class="btn primary manager-only" onclick="openProduct()">+ Product toevoegen</button>
     </div>
   </div>
 
-  <div class="stats" id="statsContainer">
-    <div class="card widget-card dashboard-widget-products"><div class="stat-top">Producten <span class="stat-icon">▤</span></div><div class="stat-value" id="statProducts">0</div><div class="stat-note">Verschillende producten</div></div>
-    <div class="card widget-card dashboard-widget-value"><div class="stat-top">Voorraadwaarde <span class="stat-icon">€</span></div><div class="stat-value" id="statValue">€ 0</div><div class="stat-note">Op basis van inkoopprijs</div></div>
-    <div class="card widget-card dashboard-widget-units"><div class="stat-top">Totale artikelen <span class="stat-icon">▦</span></div><div class="stat-value" id="statUnits">0</div><div class="stat-note">Stuks op voorraad</div></div>
-    <div class="card widget-card dashboard-widget-low"><div class="stat-top">Lage voorraad <span class="stat-icon">⚠</span></div><div class="stat-value" id="statLow">0</div><div class="stat-note">Producten onder minimum</div></div>
+  <div class="stats">
+    <div class="card widget-card dashboard-widget-products">
+      <div class="stat-top">Producten <span class="stat-icon">▤</span></div>
+      <div class="stat-value" id="statProducts">0</div>
+      <div class="stat-note">Verschillende producten</div>
+    </div>
+
+    <div class="card widget-card dashboard-widget-value">
+      <div class="stat-top">Voorraadwaarde <span class="stat-icon">€</span></div>
+      <div class="stat-value" id="statValue">€ 0</div>
+      <div class="stat-note">Op basis van inkoopprijs</div>
+    </div>
+
+    <div class="card widget-card dashboard-widget-units">
+      <div class="stat-top">Totale artikelen <span class="stat-icon">▦</span></div>
+      <div class="stat-value" id="statUnits">0</div>
+      <div class="stat-note">Stuks op voorraad</div>
+    </div>
+
+    <div class="card widget-card dashboard-widget-low">
+      <div class="stat-top">Lage voorraad <span class="stat-icon">⚠</span></div>
+      <div class="stat-value" id="statLow">0</div>
+      <div class="stat-note">Producten met aandacht</div>
+    </div>
   </div>
 
   <div class="grid-main">
@@ -177,6 +691,7 @@ body.dark-theme .danger{background:#512c35;color:#ffabb7}
       <div class="card-sub">De 7 producten met de meeste voorraad</div>
       <div class="chart" id="stockChart"></div>
     </div>
+
     <div class="card widget-card dashboard-widget-alerts">
       <div class="card-title">Voorraadmeldingen</div>
       <div class="card-sub">Producten die aandacht nodig hebben</div>
@@ -186,68 +701,160 @@ body.dark-theme .danger{background:#512c35;color:#ffabb7}
 
   <div class="table-card widget-card dashboard-widget-recent">
     <div class="table-head">
-      <div><div class="card-title">Recent toegevoegde producten</div><div class="card-sub">De laatste producten in jouw voorraad</div></div>
+      <div>
+        <div class="card-title">Recent toegevoegde producten</div>
+        <div class="card-sub">De laatste producten in jouw voorraad</div>
+      </div>
       <button class="btn secondary" onclick="showPage('inventory')">Alle producten bekijken →</button>
     </div>
-    <div class="table-scroll"><table><thead><tr><th>PRODUCT</th><th>CATEGORIE</th><th>AANTAL</th><th>INKOOPPRIJS</th><th>STATUS</th></tr></thead><tbody id="recentTable"></tbody></table></div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>PRODUCT</th><th>CATEGORIE</th><th>AANTAL</th><th>INKOOPPRIJS</th><th>STATUS</th>
+          </tr>
+        </thead>
+        <tbody id="recentTable"></tbody>
+      </table>
+    </div>
   </div>
 </section>
 
+<!-- VOORRAAD -->
 <section class="page" id="page-inventory">
   <div class="page-head">
-    <div><h1>Voorraadbeheer</h1><div class="subtitle">Beheer en controleer alle producten van jouw bedrijf.</div></div>
+    <div>
+      <h1>Voorraadbeheer</h1>
+      <div class="subtitle">Beheer en controleer alle producten van jouw bedrijf.</div>
+    </div>
     <button class="btn primary manager-only" onclick="openProduct()">+ Nieuw product</button>
   </div>
-  <div class="notice" id="permissionNotice" style="display:none">Je hebt leesrechten. Je kunt de voorraad bekijken, maar niet aanpassen.</div>
+
+  <div class="notice" id="permissionNotice" style="display:none">
+    Je hebt leesrechten. Je kunt de voorraad bekijken, maar niet aanpassen.
+  </div>
+
   <div class="table-card">
     <div class="table-head">
-      <div><div class="card-title">Productenoverzicht</div><div class="card-sub" id="productCount">0 producten</div></div>
+      <div>
+        <div class="card-title">Productenoverzicht</div>
+        <div class="card-sub" id="productCount">0 producten</div>
+      </div>
       <div class="tools">
-        <input class="search" id="search" placeholder="Zoek op product of artikelnummer..." oninput="renderInventory()">
-        <select class="search" id="filter" onchange="renderInventory()"><option value="all">Alle statussen</option><option value="low">Lage voorraad</option><option value="ok">Op voorraad</option><option value="out">Uitverkocht</option></select>
+        <input class="search" id="search" placeholder="Zoek product of artikelnummer..." oninput="renderInventory()">
+        <select class="search" id="filter" onchange="renderInventory()">
+          <option value="all">Alle statussen</option>
+          <option value="low">Lage voorraad</option>
+          <option value="ok">Op voorraad</option>
+          <option value="out">Uitverkocht</option>
+        </select>
         <button class="btn secondary" onclick="exportCSV()">↓ Export CSV</button>
       </div>
     </div>
-    <div class="table-scroll"><table><thead><tr><th>PRODUCT</th><th>CATEGORIE</th><th>AANTAL</th><th>MINIMUM</th><th>INKOOP</th><th>VERKOOP</th><th>VOORRAADWAARDE</th><th>STATUS</th><th>ACTIES</th></tr></thead><tbody id="inventoryTable"></tbody></table></div>
-    <div id="emptyInventory" class="empty" style="display:none">Nog geen producten gevonden. Voeg je eerste product toe.</div>
+
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>PRODUCT</th><th>CATEGORIE</th><th>AANTAL</th><th>MINIMUM</th>
+            <th>INKOOP</th><th>VERKOOP</th><th>VOORRAADWAARDE</th><th>STATUS</th><th>ACTIES</th>
+          </tr>
+        </thead>
+        <tbody id="inventoryTable"></tbody>
+      </table>
+    </div>
+    <div id="emptyInventory" class="empty" style="display:none">Nog geen producten gevonden.</div>
   </div>
 </section>
 
+<!-- REKENTOOLS -->
 <section class="page" id="page-calculators">
-  <div class="page-head"><div><h1>Rekentools</h1><div class="subtitle">Bereken marges, verkoopprijzen en voorraadwaardes.</div></div></div>
+  <div class="page-head">
+    <div>
+      <h1>Rekentools</h1>
+      <div class="subtitle">Bereken marges, verkoopprijzen en voorraadwaardes.</div>
+    </div>
+  </div>
+
   <div class="calc-grid">
     <div class="card">
-      <div class="card-title">Winst en marge berekenen</div><div class="card-sub">Bereken de opbrengst van een product.</div>
+      <div class="card-title">Winst en marge berekenen</div>
+      <div class="card-sub">Bereken de opbrengst van een product.</div>
+
       <div class="field"><label>Inkoopprijs (€)</label><input type="number" id="calcCost" min="0" step=".01" value="10" oninput="calculate()"></div>
       <div class="field"><label>Verkoopprijs (€)</label><input type="number" id="calcSell" min="0" step=".01" value="15" oninput="calculate()"></div>
+
       <div class="result"><small>Winst per product</small><strong id="calcProfit">€ 5,00</strong></div>
       <div class="result"><small>Winstmarge</small><strong id="calcMargin">33,3%</strong></div>
       <div class="result"><small>Opslag op inkoopprijs</small><strong id="calcMarkup">50,0%</strong></div>
     </div>
+
     <div class="card">
-      <div class="card-title">Verkoopprijs bepalen</div><div class="card-sub">Bereken de verkoopprijs met een gewenste marge.</div>
+      <div class="card-title">Verkoopprijs bepalen</div>
+      <div class="card-sub">Bereken de verkoopprijs met een gewenste marge.</div>
+
       <div class="field"><label>Inkoopprijs (€)</label><input type="number" id="priceCost" min="0" step=".01" value="10" oninput="calculatePrice()"></div>
       <div class="field"><label>Gewenste winstmarge (%)</label><input type="number" id="priceMargin" min="0" max="99.9" step=".1" value="30" oninput="calculatePrice()"></div>
+
       <div class="result"><small>Benodigde verkoopprijs</small><strong id="targetPrice">€ 14,29</strong></div>
     </div>
+
     <div class="card">
-      <div class="card-title">Voorraadcalculator</div><div class="card-sub">Bereken de waarde van een partij producten.</div>
+      <div class="card-title">Voorraadcalculator</div>
+      <div class="card-sub">Bereken de waarde van een partij producten.</div>
+
       <div class="field"><label>Aantal stuks</label><input type="number" id="stockAmount" min="0" value="100" oninput="calculateStock()"></div>
       <div class="field"><label>Inkoopprijs per stuk (€)</label><input type="number" id="stockPrice" min="0" step=".01" value="8" oninput="calculateStock()"></div>
+
       <div class="result"><small>Totale voorraadwaarde</small><strong id="stockTotal">€ 800,00</strong></div>
     </div>
   </div>
 </section>
 
+<!-- ACCOUNT -->
 <section class="page" id="page-account">
-  <div class="page-head"><div><h1>Account en rechten</h1><div class="subtitle">Informatie over jouw ingelogde account.</div></div></div>
-  <div class="card" style="max-width:650px">
-    <div class="card-title">Accountgegevens</div>
-    <div class="alert-row"><span>E-mailadres</span><strong id="accountEmail"></strong></div>
-    <div class="alert-row"><span>Gebruikersrol</span><strong id="accountRole"></strong></div>
-    <div class="alert-row"><span>Bedrijfs-ID</span><strong id="accountCompany" style="font-size:10px"></strong></div>
-    <div class="alert-row"><span>Toegang</span><span class="pill">Beveiligd</span></div>
-    <p class="card-sub" style="line-height:1.7;margin-top:18px">Je rechten worden gecontroleerd via Supabase. Medewerkers hebben alleen leesrechten. Beheerders en eigenaren kunnen voorraadgegevens beheren volgens hun accountrechten.</p>
+  <div class="page-head">
+    <div>
+      <h1>Account en rechten</h1>
+      <div class="subtitle">Beheer jouw account en bedrijfsverbindingen.</div>
+    </div>
+  </div>
+
+  <div class="account-grid">
+    <div class="card account-card">
+      <div class="card-title">Accountgegevens</div>
+      <div class="alert-row"><span>E-mailadres</span><strong id="accountEmail"></strong></div>
+      <div class="alert-row"><span>Gebruikersrol</span><strong id="accountRole"></strong></div>
+      <div class="alert-row"><span>Bedrijfs-ID</span><strong id="accountCompany" style="font-size:10px"></strong></div>
+      <div class="alert-row"><span>Toegang</span><span class="pill">Beveiligd</span></div>
+      <p class="account-description">
+        Je rechten worden gecontroleerd via Supabase. Medewerkers hebben alleen leesrechten.
+        Beheerders en eigenaren kunnen voorraadgegevens beheren volgens hun accountrechten.
+      </p>
+    </div>
+
+    <div class="card account-card">
+      <div class="integration-header">
+        <div class="integration-icon">✉</div>
+        <div>
+          <div class="card-title">Gmail koppelen</div>
+          <div class="card-sub">E-mailverbinding voor jouw bedrijf</div>
+        </div>
+      </div>
+
+      <p class="card-sub" style="line-height:1.8">
+        Koppel de Gmail-inbox van jouw bedrijf aan Optivio.
+        Hiermee kan Optivio e-mails verwerken. De huidige koppeling vraagt alleen-lezen toegang.
+      </p>
+
+      <div class="integration-status" id="gmailConnectStatus">
+        Nog geen Gmail-account gekoppeld via deze pagina.
+      </div>
+
+      <button class="btn primary manager-only" id="gmailConnectButton" onclick="connectGmail()">
+        Gmail koppelen
+      </button>
+    </div>
   </div>
 </section>
 
@@ -256,11 +863,13 @@ body.dark-theme .danger{background:#512c35;color:#ffabb7}
 </main>
 </div>
 
+<!-- PRODUCTMODAL -->
 <div class="modal-bg" id="productModal">
 <div class="modal">
   <h2 id="modalTitle">Product toevoegen</h2>
   <div class="card-sub">Vul de productgegevens in.</div>
   <input type="hidden" id="editId">
+
   <div class="field"><label>Productnaam *</label><input id="pName" placeholder="Bijvoorbeeld: Laptop Pro"></div>
   <div class="field"><label>Artikelnummer / SKU</label><input id="pSku" placeholder="Bijvoorbeeld: LAP-001"></div>
   <div class="field"><label>Categorie</label><input id="pCategory" placeholder="Bijvoorbeeld: Elektronica"></div>
@@ -268,10 +877,15 @@ body.dark-theme .danger{background:#512c35;color:#ffabb7}
   <div class="field"><label>Minimumvoorraad</label><input type="number" min="0" id="pMinimum" value="5"></div>
   <div class="field"><label>Inkoopprijs per stuk (€)</label><input type="number" min="0" step=".01" id="pCost" value="0"></div>
   <div class="field"><label>Verkoopprijs per stuk (€)</label><input type="number" min="0" step=".01" id="pSell" value="0"></div>
-  <div class="modal-actions"><button class="btn secondary" onclick="closeProduct()">Annuleren</button><button class="btn primary" onclick="saveProduct()">Opslaan</button></div>
+
+  <div class="modal-actions">
+    <button class="btn secondary" onclick="closeProduct()">Annuleren</button>
+    <button class="btn primary" id="saveProductButton" onclick="saveProduct()">Opslaan</button>
+  </div>
 </div>
 </div>
 
+<!-- DASHBOARDINSTELLINGEN -->
 <div class="modal-bg" id="dashboardSettings">
 <div class="modal">
   <h2>Mijn dashboard aanpassen</h2>
@@ -313,7 +927,6 @@ body.dark-theme .danger{background:#512c35;color:#ffabb7}
 
 const SUPABASE_URL = "https://vcgcowklqvfektlyzmia.supabase.co";
 const SUPABASE_KEY = "sb_publishable_6LEmGg5LMjgNoHHJDYmzfg_vzKf13Ry";
-
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentUser = null;
@@ -322,8 +935,8 @@ let userRole = null;
 let products = [];
 
 const DEFAULT_PREFERENCES = {
-  theme: "light",
-  widgets: {
+  theme:"light",
+  widgets:{
     products:true,
     value:true,
     units:true,
@@ -336,7 +949,11 @@ const DEFAULT_PREFERENCES = {
 
 let dashboardPreferences = JSON.parse(JSON.stringify(DEFAULT_PREFERENCES));
 
-const money = n => new Intl.NumberFormat("nl-NL",{style:"currency",currency:"EUR"}).format(Number(n)||0);
+const money = n => new Intl.NumberFormat("nl-NL",{
+  style:"currency",
+  currency:"EUR"
+}).format(Number(n)||0);
+
 const number = n => new Intl.NumberFormat("nl-NL").format(Number(n)||0);
 const canManage = () => ["owner","admin"].includes(userRole);
 const canDelete = () => userRole === "owner";
@@ -346,7 +963,7 @@ function toast(message){
   el.textContent=message;
   el.style.display="block";
   clearTimeout(window.toastTimer);
-  window.toastTimer=setTimeout(()=>el.style.display="none",3000);
+  window.toastTimer=setTimeout(()=>el.style.display="none",3500);
 }
 
 function status(p){
@@ -359,6 +976,7 @@ function showPage(name){
   document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
   const page=document.getElementById("page-"+name);
   if(page)page.classList.add("active");
+
   document.querySelectorAll(".nav[data-page]").forEach(n=>{
     n.classList.toggle("active",n.dataset.page===name);
   });
@@ -370,11 +988,15 @@ document.querySelectorAll(".nav[data-page]").forEach(n=>{
 
 function escapeHtml(value){
   return String(value??"").replace(/[&<>"']/g,c=>({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#39;"
   }[c]));
 }
 
-/* PERSOONLIJKE DASHBOARDINSTELLINGEN */
+/* DASHBOARDINSTELLINGEN */
 
 async function loadDashboardSettings(){
   const {data,error}=await db
@@ -461,7 +1083,7 @@ async function saveDashboardSettings(){
     dashboardPreferences=preferences;
     applyDashboardSettings();
     closeDashboardSettings();
-    toast("Jouw dashboardinstellingen zijn opgeslagen.");
+    toast("Dashboardinstellingen opgeslagen.");
   }catch(error){
     toast("Opslaan mislukt: "+error.message);
   }finally{
@@ -509,18 +1131,28 @@ async function init(){
   companyId=members[0].company_id;
   userRole=members[0].role;
 
-  document.getElementById("userName").textContent=(currentUser.email||"Gebruiker").split("@")[0];
+  document.getElementById("userName").textContent=
+    (currentUser.email||"Gebruiker").split("@")[0];
+
   document.getElementById("userRole").textContent=roleName(userRole);
-  document.getElementById("avatar").textContent=(currentUser.email||"O")[0].toUpperCase();
+  document.getElementById("avatar").textContent=
+    (currentUser.email||"O")[0].toUpperCase();
+
   document.getElementById("accountEmail").textContent=currentUser.email||"";
   document.getElementById("accountRole").textContent=roleName(userRole);
   document.getElementById("accountCompany").textContent=companyId;
-  document.getElementById("today").textContent=new Date().toLocaleDateString("nl-NL",{
-    day:"numeric",month:"long",year:"numeric"
-  });
+
+  document.getElementById("today").textContent=
+    new Date().toLocaleDateString("nl-NL",{
+      day:"numeric",
+      month:"long",
+      year:"numeric"
+    });
 
   if(!canManage()){
-    document.querySelectorAll(".manager-only").forEach(el=>el.style.display="none");
+    document.querySelectorAll(".manager-only").forEach(el=>{
+      el.style.display="none";
+    });
     document.getElementById("permissionNotice").style.display="block";
   }
 
@@ -536,13 +1168,89 @@ async function init(){
 }
 
 function roleName(role){
-  return ({owner:"Eigenaar",admin:"Beheerder",member:"Medewerker"})[role]||role;
+  return ({
+    owner:"Eigenaar",
+    admin:"Beheerder",
+    member:"Medewerker"
+  })[role]||role;
+}
+
+/* GMAIL KOPPELEN */
+
+async function connectGmail(){
+  if(!canManage()){
+    toast("Alleen een eigenaar of beheerder kan Gmail koppelen.");
+    return;
+  }
+
+  const button=document.getElementById("gmailConnectButton");
+  const statusElement=document.getElementById("gmailConnectStatus");
+
+  const popup=window.open("about:blank","optivio-gmail");
+
+  if(!popup){
+    toast("Sta pop-ups toe voor Optivio en probeer opnieuw.");
+    return;
+  }
+
+  button.disabled=true;
+  button.textContent="Verbinden...";
+
+  try{
+    const {
+      data:{session},
+      error:sessionError
+    }=await db.auth.getSession();
+
+    if(sessionError)throw sessionError;
+    if(!session)throw new Error("Je bent niet ingelogd.");
+
+    const response=await fetch(
+      SUPABASE_URL+"/functions/v1/gmail-connect",
+      {
+        method:"POST",
+        headers:{
+          "Authorization":"Bearer "+session.access_token,
+          "apikey":SUPABASE_KEY,
+          "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+          company_id:companyId
+        })
+      }
+    );
+
+    const result=await response.json();
+
+    if(!response.ok){
+      throw new Error(result.error||"Gmail koppelen is mislukt.");
+    }
+
+    if(
+      !result.auth_url||
+      !result.auth_url.startsWith("https://accounts.google.com/")
+    ){
+      throw new Error("Google heeft geen geldige inloglink teruggegeven.");
+    }
+
+    statusElement.textContent="Google-inlogpagina geopend. Volg de stappen om Gmail te koppelen.";
+    popup.location.href=result.auth_url;
+
+  }catch(error){
+    popup.close();
+    console.error("Gmail-koppeling:",error);
+    toast(error.message||"Gmail koppelen is mislukt.");
+  }finally{
+    button.disabled=false;
+    button.textContent="Gmail koppelen";
+  }
 }
 
 /* PRODUCTEN */
 
 async function loadProducts(){
-  const {data,error}=await db.from("company_data")
+  const {data,error}=await db
+    .from("company_data")
     .select("id,company_id,data")
     .eq("company_id",companyId);
 
@@ -556,8 +1264,14 @@ async function loadProducts(){
 }
 
 function renderAll(){
-  const totalUnits=products.reduce((s,p)=>s+Number(p.quantity||0),0);
-  const totalValue=products.reduce((s,p)=>s+Number(p.quantity||0)*Number(p.cost_price||0),0);
+  const totalUnits=products.reduce(
+    (s,p)=>s+Number(p.quantity||0),0
+  );
+
+  const totalValue=products.reduce(
+    (s,p)=>s+Number(p.quantity||0)*Number(p.cost_price||0),0
+  );
+
   const low=products.filter(p=>status(p)[1]!=="ok").length;
 
   document.getElementById("statProducts").textContent=number(products.length);
@@ -572,37 +1286,59 @@ function renderAll(){
 }
 
 function renderChart(){
-  const list=[...products].sort((a,b)=>Number(b.quantity)-Number(a.quantity)).slice(0,7);
+  const list=[...products]
+    .sort((a,b)=>Number(b.quantity)-Number(a.quantity))
+    .slice(0,7);
+
   const max=Math.max(1,...list.map(p=>Number(p.quantity)||0));
 
-  document.getElementById("stockChart").innerHTML=list.length?list.map((p,i)=>`
-    <div class="bar-wrap" title="${escapeHtml(p.name)}: ${number(p.quantity)}">
-      <div class="bar ${i===0?"highlight":""}" style="height:${Math.max(3,(Number(p.quantity||0)/max)*100)}%"></div>
-      <div class="bar-label">${escapeHtml((p.name||"").slice(0,9))}</div>
-    </div>`).join(""):'<div class="empty">Nog geen voorraadgegevens</div>';
+  document.getElementById("stockChart").innerHTML=
+    list.length
+    ?list.map((p,i)=>`
+      <div class="bar-wrap" title="${escapeHtml(p.name)}: ${number(p.quantity)}">
+        <div class="bar ${i===0?"highlight":""}"
+          style="height:${Math.max(3,(Number(p.quantity||0)/max)*100)}%">
+        </div>
+        <div class="bar-label">${escapeHtml((p.name||"").slice(0,9))}</div>
+      </div>
+    `).join("")
+    :'<div class="empty">Nog geen voorraadgegevens</div>';
 }
 
 function renderAlerts(){
-  const list=products.filter(p=>status(p)[1]!=="ok").slice(0,6);
+  const list=products
+    .filter(p=>status(p)[1]!=="ok")
+    .slice(0,6);
 
-  document.getElementById("alerts").innerHTML=list.length?list.map(p=>`
-    <div class="alert-row">
-      <span>${escapeHtml(p.name)}</span>
-      <span class="pill ${status(p)[1]}">${number(p.quantity)} stuks</span>
-    </div>`).join(""):'<div class="empty">Geen voorraadmeldingen. Alles ziet er goed uit.</div>';
+  document.getElementById("alerts").innerHTML=
+    list.length
+    ?list.map(p=>`
+      <div class="alert-row">
+        <span>${escapeHtml(p.name)}</span>
+        <span class="pill ${status(p)[1]}">${number(p.quantity)} stuks</span>
+      </div>
+    `).join("")
+    :'<div class="empty">Geen voorraadmeldingen. Alles ziet er goed uit.</div>';
 }
 
 function renderRecent(){
   const list=[...products].slice(-5).reverse();
 
-  document.getElementById("recentTable").innerHTML=list.length?list.map(p=>`
-    <tr>
-      <td><span class="product-name">${escapeHtml(p.name)}</span><div class="product-sku">${escapeHtml(p.sku||"Geen artikelnummer")}</div></td>
-      <td>${escapeHtml(p.category||"-")}</td>
-      <td>${number(p.quantity)}</td>
-      <td>${money(p.cost_price)}</td>
-      <td><span class="pill ${status(p)[1]}">${status(p)[0]}</span></td>
-    </tr>`).join(""):'<tr><td colspan="5" class="empty">Nog geen producten toegevoegd</td></tr>';
+  document.getElementById("recentTable").innerHTML=
+    list.length
+    ?list.map(p=>`
+      <tr>
+        <td>
+          <span class="product-name">${escapeHtml(p.name)}</span>
+          <div class="product-sku">${escapeHtml(p.sku||"Geen artikelnummer")}</div>
+        </td>
+        <td>${escapeHtml(p.category||"-")}</td>
+        <td>${number(p.quantity)}</td>
+        <td>${money(p.cost_price)}</td>
+        <td><span class="pill ${status(p)[1]}">${status(p)[0]}</span></td>
+      </tr>
+    `).join("")
+    :'<tr><td colspan="5" class="empty">Nog geen producten toegevoegd</td></tr>';
 }
 
 function renderInventory(){
@@ -614,35 +1350,52 @@ function renderInventory(){
   const f=filter.value;
 
   const list=products.filter(p=>{
-    const matches=(p.name+" "+(p.sku||"")+" "+(p.category||"")).toLowerCase().includes(q);
+    const matches=(
+      (p.name||"")+" "+
+      (p.sku||"")+" "+
+      (p.category||"")
+    ).toLowerCase().includes(q);
+
     const s=status(p)[1];
     return matches&&(f==="all"||f===s);
   });
 
-  document.getElementById("productCount").textContent=list.length+" producten";
-  document.getElementById("emptyInventory").style.display=list.length?"none":"block";
+  document.getElementById("productCount").textContent=
+    list.length+" producten";
 
-  document.getElementById("inventoryTable").innerHTML=list.map(p=>`
-    <tr>
-      <td><span class="product-name">${escapeHtml(p.name)}</span><div class="product-sku">${escapeHtml(p.sku||"-")}</div></td>
-      <td>${escapeHtml(p.category||"-")}</td>
-      <td>${number(p.quantity)}</td>
-      <td>${number(p.minimum)}</td>
-      <td>${money(p.cost_price)}</td>
-      <td>${money(p.sell_price)}</td>
-      <td>${money(Number(p.quantity)*Number(p.cost_price))}</td>
-      <td><span class="pill ${status(p)[1]}">${status(p)[0]}</span></td>
-      <td><div class="actions">
-        ${canManage()?`<button class="small-btn" onclick="editProduct('${p.id}')">Wijzig</button>`:""}
-        ${canDelete()?`<button class="small-btn" onclick="deleteProduct('${p.id}')">Verwijder</button>`:""}
-      </div></td>
-    </tr>`).join("");
+  document.getElementById("emptyInventory").style.display=
+    list.length?"none":"block";
+
+  document.getElementById("inventoryTable").innerHTML=
+    list.map(p=>`
+      <tr>
+        <td>
+          <span class="product-name">${escapeHtml(p.name)}</span>
+          <div class="product-sku">${escapeHtml(p.sku||"-")}</div>
+        </td>
+        <td>${escapeHtml(p.category||"-")}</td>
+        <td>${number(p.quantity)}</td>
+        <td>${number(p.minimum)}</td>
+        <td>${money(p.cost_price)}</td>
+        <td>${money(p.sell_price)}</td>
+        <td>${money(Number(p.quantity)*Number(p.cost_price))}</td>
+        <td><span class="pill ${status(p)[1]}">${status(p)[0]}</span></td>
+        <td>
+          <div class="actions">
+            ${canManage()?`<button class="small-btn" onclick="editProduct('${p.id}')">Wijzig</button>`:""}
+            ${canDelete()?`<button class="small-btn" onclick="deleteProduct('${p.id}')">Verwijder</button>`:""}
+          </div>
+        </td>
+      </tr>
+    `).join("");
 }
 
 function openProduct(p=null){
   if(!canManage())return;
 
-  document.getElementById("modalTitle").textContent=p?"Product wijzigen":"Product toevoegen";
+  document.getElementById("modalTitle").textContent=
+    p?"Product wijzigen":"Product toevoegen";
+
   document.getElementById("editId").value=p?.id||"";
   document.getElementById("pName").value=p?.name||"";
   document.getElementById("pSku").value=p?.sku||"";
@@ -651,6 +1404,7 @@ function openProduct(p=null){
   document.getElementById("pMinimum").value=p?.minimum??5;
   document.getElementById("pCost").value=p?.cost_price??0;
   document.getElementById("pSell").value=p?.sell_price??0;
+
   document.getElementById("productModal").classList.add("open");
 }
 
@@ -666,8 +1420,13 @@ function editProduct(id){
 async function saveProduct(){
   if(!canManage())return;
 
+  const button=document.getElementById("saveProductButton");
   const name=document.getElementById("pName").value.trim();
-  if(!name){toast("Vul een productnaam in.");return;}
+
+  if(!name){
+    toast("Vul een productnaam in.");
+    return;
+  }
 
   const quantity=Number(document.getElementById("pQuantity").value);
   const minimum=Number(document.getElementById("pMinimum").value);
@@ -692,27 +1451,46 @@ async function saveProduct(){
   };
 
   const id=document.getElementById("editId").value;
-  let result;
 
-  if(id){
-    result=await db.from("company_data")
-      .update({data:values})
-      .eq("id",id)
-      .eq("company_id",companyId);
-  }else{
-    result=await db.from("company_data")
-      .insert({company_id:companyId,data:values});
+  button.disabled=true;
+  button.textContent="Opslaan...";
+
+  try{
+    let result;
+
+    if(id){
+      result=await db.from("company_data")
+        .update({data:values})
+        .eq("id",id)
+        .eq("company_id",companyId);
+    }else{
+      result=await db.from("company_data")
+        .insert({
+          company_id:companyId,
+          data:values
+        });
+    }
+
+    if(result.error)throw result.error;
+
+    closeProduct();
+    await loadProducts();
+    toast("Product opgeslagen.");
+
+  }catch(error){
+    toast("Opslaan mislukt: "+error.message);
+  }finally{
+    button.disabled=false;
+    button.textContent="Opslaan";
   }
-
-  if(result.error){toast("Opslaan mislukt: "+result.error.message);return;}
-
-  closeProduct();
-  await loadProducts();
-  toast("Product opgeslagen.");
 }
 
 async function deleteProduct(id){
-  if(!canDelete()){toast("Alleen de eigenaar kan producten verwijderen.");return;}
+  if(!canDelete()){
+    toast("Alleen de eigenaar kan producten verwijderen.");
+    return;
+  }
+
   if(!confirm("Weet je zeker dat je dit product wilt verwijderen?"))return;
 
   const {error}=await db.from("company_data")
@@ -720,7 +1498,10 @@ async function deleteProduct(id){
     .eq("id",id)
     .eq("company_id",companyId);
 
-  if(error){toast("Verwijderen mislukt: "+error.message);return;}
+  if(error){
+    toast("Verwijderen mislukt: "+error.message);
+    return;
+  }
 
   await loadProducts();
   toast("Product verwijderd.");
@@ -729,21 +1510,37 @@ async function deleteProduct(id){
 /* EXPORT */
 
 function exportCSV(){
-  const rows=[["Product","Artikelnummer","Categorie","Aantal","Minimum","Inkoopprijs","Verkoopprijs","Voorraadwaarde"]];
+  const rows=[[
+    "Product","Artikelnummer","Categorie","Aantal",
+    "Minimum","Inkoopprijs","Verkoopprijs","Voorraadwaarde"
+  ]];
 
   products.forEach(p=>rows.push([
-    p.name,p.sku,p.category,p.quantity,p.minimum,p.cost_price,p.sell_price,
+    p.name,
+    p.sku,
+    p.category,
+    p.quantity,
+    p.minimum,
+    p.cost_price,
+    p.sell_price,
     (Number(p.quantity)*Number(p.cost_price)).toFixed(2)
   ]));
 
-  const csv=rows.map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(";")).join("\n");
-  const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});
+  const csv=rows.map(r=>
+    r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(";")
+  ).join("\n");
+
+  const blob=new Blob(["\uFEFF"+csv],{
+    type:"text/csv;charset=utf-8"
+  });
+
   const url=URL.createObjectURL(blob);
   const a=document.createElement("a");
   a.href=url;
   a.download="optivio-voorraad.csv";
   a.click();
-  URL.revokeObjectURL(url);
+
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
   toast("CSV-bestand gedownload.");
 }
 
@@ -755,8 +1552,12 @@ function calculate(){
   const profit=s-c;
 
   document.getElementById("calcProfit").textContent=money(profit);
-  document.getElementById("calcMargin").textContent=(s>0?profit/s*100:0).toFixed(1).replace(".",",")+"%";
-  document.getElementById("calcMarkup").textContent=(c>0?profit/c*100:0).toFixed(1).replace(".",",")+"%";
+
+  document.getElementById("calcMargin").textContent=
+    (s>0?profit/s*100:0).toFixed(1).replace(".",",")+"%";
+
+  document.getElementById("calcMarkup").textContent=
+    (c>0?profit/c*100:0).toFixed(1).replace(".",",")+"%";
 }
 
 function calculatePrice(){
@@ -764,14 +1565,35 @@ function calculatePrice(){
   const m=Number(document.getElementById("priceMargin").value)||0;
 
   document.getElementById("targetPrice").textContent=
-    m>=100||m<0?"Ongeldige marge":money(c/(1-m/100));
+    m>=100||m<0
+      ?"Ongeldige marge"
+      :money(c/(1-m/100));
 }
 
 function calculateStock(){
   const q=Number(document.getElementById("stockAmount").value)||0;
   const p=Number(document.getElementById("stockPrice").value)||0;
+
   document.getElementById("stockTotal").textContent=money(q*p);
 }
+
+/* MODALS SLUITEN */
+
+document.querySelectorAll(".modal-bg").forEach(modal=>{
+  modal.addEventListener("click",event=>{
+    if(event.target===modal){
+      modal.classList.remove("open");
+    }
+  });
+});
+
+document.addEventListener("keydown",event=>{
+  if(event.key==="Escape"){
+    document.querySelectorAll(".modal-bg.open").forEach(modal=>{
+      modal.classList.remove("open");
+    });
+  }
+});
 
 /* UITLOGGEN EN SESSIE */
 
@@ -780,7 +1602,7 @@ document.getElementById("logout").addEventListener("click",async()=>{
   location.href="/login.html";
 });
 
-db.auth.onAuthStateChange((event)=>{
+db.auth.onAuthStateChange(event=>{
   if(event==="SIGNED_OUT"){
     location.href="/login.html";
   }
